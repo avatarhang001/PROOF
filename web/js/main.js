@@ -5,7 +5,7 @@ import { api } from './api.js';
 import { app, refreshMe } from './state.js';
 import { WalletService } from './wallet.js';
 import { esc, $, ico } from './ui.js';
-import './runtime-fixes.js';
+import './release-hardening.js';
 import * as onboarding from './views/onboarding.js';
 import * as home from './views/home.js';
 import * as learn from './views/learn.js';
@@ -28,119 +28,92 @@ const ROUTES = [
   ['glossary', glossary.glossary],
   ['', home.screen],
   ['prove', prove.hub],
-  ['prove/challenge/:id', prove.challengeScreen],
-  ['prove/attempt/:id', prove.attemptScreen],
-  ['daily', (screen) => prove.challengeScreen(screen, { id: 'daily' })],
-  ['work', work.hub],
-  ['work/:tab', work.hub],
-  ['profile', profile.screen],
-  ['leaderboard', misc.leaderboardScreen],
-  ['notifications', misc.notificationsScreen],
-  ['u/:username', misc.publicProfileScreen, { public: true }],
+  ['prove/challenge/:id', prove.challenge],
+  ['daily', misc.daily],
+  ['work', work.work],
+  ['profile', profile.profile],
+  ['leaderboard', profile.leaderboard],
+  ['notifications', misc.notifications],
+  ['p/:id', misc.publicProfile],
 ];
 
 const NAV = [
-  { href: '#/', ico: 'home', label: 'Home', match: ['', 'onboarding'], mobile: true },
-  { href: '#/learn', ico: 'learn', label: 'Learn', match: ['learn'], mobile: true },
-  { href: '#/reviews', ico: 'clock', label: 'Review', match: ['reviews'], mobile: true },
-  { href: '#/prove', ico: 'prove', label: 'Prove', match: ['prove', 'daily'], mobile: true },
-  { href: '#/work', ico: 'work', label: 'Work', match: ['work'], mobile: false },
-  { href: '#/profile', ico: 'profile', label: 'You', match: ['profile'], mobile: true },
+  { hash: '#/', label: 'Home', icon: ico.home },
+  { hash: '#/learn', label: 'Learn', icon: ico.book },
+  { hash: '#/reviews', label: 'Review', icon: ico.refresh },
+  { hash: '#/prove', label: 'Prove', icon: ico.target },
+  { hash: '#/work', label: 'Work', icon: ico.briefcase, mobile: false },
+  { hash: '#/profile', label: 'You', icon: ico.user },
 ];
 
-const appEl = () => document.getElementById('app');
-let navRendered = false;
-let reviewsDueCount = 0;
-
-async function updateReviewsCount() {
-  if (!app.me) return;
-  try {
-    const res = await api.get('/api/reviews/stats');
-    reviewsDueCount = res.stats.dueToday || 0;
-    updateNavBadge();
-  } catch (e) { /* non-critical */ }
-}
-
-function updateNavBadge() {
-  const nav = document.getElementById('bottomNav');
-  if (!nav) return;
-  const reviewLink = nav.querySelector('a[href="#/reviews"]');
-  if (!reviewLink) return;
-  let badge = reviewLink.querySelector('.nav-badge');
-  if (reviewsDueCount > 0) {
-    if (!badge) { badge = document.createElement('span'); badge.className = 'nav-badge'; reviewLink.appendChild(badge); }
-    badge.textContent = reviewsDueCount > 9 ? '9+' : reviewsDueCount;
-  } else if (badge) badge.remove();
-}
-
-function renderNav(activeKey) {
-  if (!navRendered) {
-    const nav = document.createElement('nav');
-    nav.className = 'nav';
-    nav.id = 'bottomNav';
-    nav.setAttribute('aria-label', 'Primary navigation');
-    nav.innerHTML = NAV.map((n) =>
-      `<a href="${n.href}" data-key="${n.match[0]}" data-mobile="${n.mobile}" aria-label="${n.label}"><span class="nav-ico" data-ico="${n.ico}"></span><span class="nav-label">${n.label}</span></a>`
-    ).join('');
-    appEl().after(nav);
-    navRendered = true;
-    updateReviewsCount();
-    setInterval(updateReviewsCount, 300000);
-  }
-  const nav = document.getElementById('bottomNav');
-  nav.querySelectorAll('a').forEach((a) => {
-    const key = a.dataset.key;
-    const item = NAV.find((n) => n.match[0] === key);
-    a.classList.toggle('active', item.match.includes(activeKey));
-    const span = a.querySelector('.nav-ico');
-    if (span && !span.dataset.done) { span.innerHTML = ico[item.ico]; span.dataset.done = '1'; }
-  });
-  updateNavBadge();
-}
-
-function parseHash() {
-  const raw = location.hash.replace(/^#\/?/, '');
-  return raw.split('?')[0];
-}
-
-async function router() {
-  const path = parseHash();
-  const segs = path.split('/').filter(Boolean);
-  for (const [pattern, view, opts = {}] of ROUTES) {
-    const pp = pattern.split('/').filter(Boolean);
-    if (pp.length !== segs.length) continue;
+function routeMatch(path) {
+  for (const [pattern, fn, meta] of ROUTES) {
+    const a = pattern.split('/').filter(Boolean);
+    const b = path.split('/').filter(Boolean);
+    if (a.length !== b.length) continue;
     const params = {};
     let ok = true;
-    for (let i = 0; i < pp.length; i++) {
-      if (pp[i].startsWith(':')) params[pp[i].slice(1)] = decodeURIComponent(segs[i]);
-      else if (pp[i] !== segs[i]) { ok = false; break; }
+    for (let i = 0; i < a.length; i++) {
+      if (a[i].startsWith(':')) params[a[i].slice(1)] = decodeURIComponent(b[i]);
+      else if (a[i] !== b[i]) { ok = false; break; }
     }
-    if (!ok) continue;
-    if (!opts.public && !app.me) { location.hash = '#/onboarding'; return; }
-    const activeKey = pp[0] || '';
-    if (!opts.public) renderNav(activeKey); else document.getElementById('bottomNav')?.remove(), navRendered = false;
-    const screen = document.createElement('div');
-    screen.className = 'screen';
-    screen.innerHTML = `<div class="pad" style="padding-top:max(16px, env(safe-area-inset-top))"><div class="skeleton" style="height:120px;border-radius:20px"></div><div class="skeleton mt12" style="height:84px;border-radius:16px"></div><div class="skeleton mt12" style="height:84px;border-radius:16px"></div></div>`;
-    appEl().replaceChildren(screen);
-    try { await view(screen, params); }
-    catch (e) {
-      screen.innerHTML = `<div class="pad" style="padding-top:60px;text-align:center"><div style="font-size:40px">🌧️</div><h2 class="h1 mt8">Something hiccuped</h2><p class="sub mt8">${esc(e.message || 'Please try again.')}</p><button class="btn btn-soft mt16" onclick="location.reload()">Reload</button></div>`;
-    }
-    window.scrollTo({ top: 0 });
-    return;
+    if (ok) return { fn, params, meta };
   }
-  location.hash = '#/';
+  return null;
 }
 
-window.addEventListener('hashchange', router);
+function currentPath() {
+  return location.hash.replace(/^#\/?/, '').split('?')[0];
+}
 
-(async function boot() {
-  WalletService.restore();
-  const me = await refreshMe();
-  if (!me) location.hash = location.hash.startsWith('#/u/') ? location.hash : '#/onboarding';
-  app.booted = true;
-  router();
-})();
+function activeNav(hash) {
+  const path = hash.replace(/^#\/?/, '').split('?')[0];
+  if (!path) return '#/';
+  if (path.startsWith('learn')) return '#/learn';
+  if (path.startsWith('reviews')) return '#/reviews';
+  if (path.startsWith('prove')) return '#/prove';
+  if (path.startsWith('work')) return '#/work';
+  if (path.startsWith('profile') || path.startsWith('leaderboard') || path.startsWith('notifications')) return '#/profile';
+  return '#/';
+}
 
-export { api, app };
+function renderNav(root) {
+  const active = activeNav(location.hash);
+  root.innerHTML = NAV.map((n) => `<a href="${n.hash}" class="${active === n.hash ? 'active' : ''}"${n.mobile === false ? ' data-mobile="false"' : ''} aria-label="${esc(n.label)}"><span class="nav-icon">${n.icon}</span><span class="nav-label">${esc(n.label)}</span></a>`).join('');
+}
+
+async function boot() {
+  const appRoot = document.getElementById('app');
+  if (!appRoot) return;
+  let nav = document.querySelector('.nav');
+  if (!nav) {
+    nav = document.createElement('nav');
+    nav.className = 'nav';
+    nav.setAttribute('aria-label', 'Primary navigation');
+    document.body.appendChild(nav);
+  }
+  renderNav(nav);
+
+  const render = async () => {
+    renderNav(nav);
+    const path = currentPath();
+    const match = routeMatch(path);
+    const route = match || { fn: onboarding.screen, params: {}, meta: { public: true } };
+    const publicRoute = route.meta?.public;
+    if (!publicRoute) {
+      try { await refreshMe(); } catch (e) { console.warn('refreshMe failed', e); }
+    }
+    appRoot.className = 'screen';
+    try {
+      await route.fn(appRoot, route.params);
+    } catch (e) {
+      console.error(e);
+      appRoot.innerHTML = `<div class="pad"><div class="card"><h1 class="h2">Something went wrong</h1><p class="sub mt8">${esc(e?.message || 'Unable to load this screen.')}</p><a class="btn btn-primary mt16" href="#/">Back home</a></div></div>`;
+    }
+  };
+
+  window.addEventListener('hashchange', render);
+  await render();
+}
+
+boot();
