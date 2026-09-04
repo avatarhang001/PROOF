@@ -1,23 +1,19 @@
 /**
  * Final release hardening.
- * Keeps disabled controls visually disabled without falsely implying loading.
+ * Disabled controls are not treated as loading controls.
  */
 
 const style = document.createElement('style');
 style.id = 'proof-release-hardening';
 style.textContent = `
-  /* Disabled is not the same thing as loading. */
-  button.btn-primary:disabled::after,
-  button.btn-secondary:disabled::after,
-  button.btn-ghost:disabled::after,
-  button.btn-soft:disabled::after,
-  button.btn-nim:disabled::after,
-  button.btn-ok:disabled::after {
+  /* The legacy polish layer attaches a spinner to disabled buttons. Override
+     that behavior globally: disabled means unavailable, not loading. */
+  button:disabled::after {
     content: none !important;
     animation: none !important;
   }
 
-  /* Only explicit loading controls receive a spinner. */
+  /* Only an explicit loading state gets a spinner. */
   button.is-loading {
     position: relative;
     pointer-events: none;
@@ -45,16 +41,3 @@ style.textContent = `
 `;
 
 document.head.appendChild(style);
-
-// Defensive final normalizer for the known lesson navigation regression.
-// This is intentionally scoped to #next; it does not mutate arbitrary buttons.
-const normalizeLessonNext = () => {
-  const button = document.getElementById('next');
-  if (!button || !button.textContent.includes('<svg')) return;
-  const label = button.textContent.replace(/\s*<svg[\\s\\S]*$/i, '').trim() || 'Next';
-  button.textContent = label;
-};
-
-const observer = new MutationObserver(normalizeLessonNext);
-observer.observe(document.body, { subtree: true, childList: true, characterData: true });
-window.addEventListener('hashchange', normalizeLessonNext);
