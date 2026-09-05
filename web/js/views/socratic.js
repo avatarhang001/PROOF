@@ -4,7 +4,7 @@
  */
 
 import { api } from '../api.js';
-import { esc, toast } from '../ui.js';
+import { esc, toast, pageHeader } from '../ui.js';
 
 // Active session state
 let activeSession = null;
@@ -29,12 +29,14 @@ export async function socratic(screen) {
   }
   
   screen.innerHTML = `
-    <div class="container socratic-hub">
-      <header class="hub-header">
-        <h1>🎯 Grilling Sessions</h1>
-        <p class="subtitle">Deep learning through powerful questions</p>
-      </header>
-      
+    <div class="reference-page reference-reading reference-socratic pad socratic-hub">
+      ${pageHeader({
+        eyebrow: 'GUIDED THINKING',
+        title: 'Socratic sessions',
+        description: 'Thoughtful questions turn passive lessons into understanding you can use.',
+        backHref: '#/learn',
+        backLabel: 'Learning',
+      })}
       ${sessions.length === 0 ? renderEmptyState() : renderSessionsList(sessions)}
     </div>
   `;
@@ -117,15 +119,16 @@ function renderSessionCard(session) {
  */
 function renderActiveSession() {
   if (!activeSession?.currentQuestion) {
-    return `<div class="container socratic-session"><p class="sub">No active question. Start a lesson to begin a grilling session.</p></div>`;
+    return `<div class="reference-page reference-reading reference-socratic-session pad">${pageHeader({ eyebrow: 'GUIDED THINKING', title: 'Socratic session', description: 'No active question yet.', backHref: '#/learn', backLabel: 'Learning' })}<div class="card"><p class="sub">Start a lesson to begin a guided reflection.</p></div></div>`;
   }
   const { currentQuestion, currentQuestionIndex, questions } = activeSession;
   const total = Math.max(questions?.length || activeSession.questionCount || 1, 1);
   const progress = ((currentQuestionIndex + 1) / total) * 100;
   
   return `
-    <div class="container socratic-session">
-      <div class="session-progress">
+    <div class="reference-page reference-reading reference-socratic-session pad">
+      ${pageHeader({ eyebrow: 'THINK IT THROUGH', title: activeSession.topicTitle || 'Socratic session', description: 'There’s no rush. Specific examples make the insight yours.', backHref: '#/learn', backLabel: 'Learning' })}
+      <div class="session-progress reference-session-progress">
         <div class="progress-bar">
           <div class="progress-fill" style="width: ${progress}%"></div>
         </div>
@@ -134,15 +137,15 @@ function renderActiveSession() {
         </span>
       </div>
       
-      <div class="question-card">
+      <article class="question-card reference-question-card">
         <div class="question-icon">💡</div>
         <h2 class="question-text">${esc(currentQuestion.text)}</h2>
         <p class="question-hint">
           Take your time. The goal is deep thinking, not quick answers.
         </p>
-      </div>
+      </article>
       
-      <div class="response-area">
+      <div class="response-area reference-response-area">
         <textarea 
           class="response-input"
           placeholder="Type your response here... Be specific and use examples."
@@ -182,11 +185,12 @@ function renderSessionComplete(insights) {
     : 'var(--warning)';
   
   return `
-    <div class="container session-complete">
+    <div class="reference-page reference-reading reference-session-complete pad session-complete">
+      ${pageHeader({ eyebrow: 'REFLECTION COMPLETE', title: 'You did the thinking.', description: 'Here is a clear picture of your current understanding.', backHref: '#/learn', backLabel: 'Learning' })}
       <div class="complete-header">
         <div class="complete-icon">🎉</div>
-        <h1>Session Complete!</h1>
-        <p>Here's what we learned about your understanding</p>
+        <h2>Session complete</h2>
+        <p>Here’s what we learned about your understanding.</p>
       </div>
       
       <div class="readiness-score">
@@ -367,7 +371,8 @@ function showFollowUpPrompt(followUpText, nextQuestion) {
   if (!screen) return;
   
   screen.innerHTML = `
-    <div class="container socratic-followup">
+    <div class="reference-page reference-reading reference-socratic-followup pad socratic-followup">
+      ${pageHeader({ eyebrow: 'ONE MORE THOUGHT', title: 'Let’s dig a little deeper.', description: 'A small pause can reveal the connection that makes this stick.', backHref: '#/learn', backLabel: 'Learning' })}
       <div class="followup-card">
         <div class="followup-icon">🤔</div>
         <h2>Let's dig a bit deeper...</h2>

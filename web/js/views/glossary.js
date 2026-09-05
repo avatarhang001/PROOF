@@ -4,7 +4,7 @@
  */
 
 import { api } from '../api.js';
-import { esc, ico, toast } from '../ui.js';
+import { esc, ico, toast, pageHeader } from '../ui.js';
 
 let currentLevel = 'all'; // all, beginner, intermediate, expert
 
@@ -15,20 +15,15 @@ export async function glossary(screen) {
   const { terms, count } = await api.get(`/api/glossary?limit=100`);
   
   screen.innerHTML = `
-    <div class="container glossary-view">
-      <header class="glossary-header">
-        <div class="row-between">
-          <div>
-            <h1>📚 My Glossary</h1>
-            <p class="subtitle">Your personal vocabulary - ${count} terms</p>
-          </div>
-          <button class="btn-primary" id="addTermBtn">
-            + Add Term
-          </button>
-        </div>
-      </header>
+    <div class="reference-page reference-reading reference-glossary pad glossary-view">
+      ${pageHeader({
+        eyebrow: 'WORDS YOU OWN',
+        title: 'My glossary',
+        description: `${count} ${count === 1 ? 'term' : 'terms'} captured in your own words.`,
+        actions: '<button class="btn btn-primary btn-sm" id="addTermBtn">+ Add term</button>',
+      })}
       
-      <div class="level-filters">
+      <div class="level-filters reference-tabs">
         <button class="filter-btn ${currentLevel === 'all' ? 'active' : ''}" data-level="all">
           All (${count})
         </button>
@@ -191,7 +186,7 @@ function renderTermCard(term) {
   };
   
   return `
-    <div class="term-card">
+    <article class="term-card reference-term-card">
       <div class="term-header">
         <div class="term-level" style="color: ${levelColors[term.level]}">
           ${levelEmojis[term.level]} ${term.level}
@@ -209,7 +204,7 @@ function renderTermCard(term) {
           <span class="term-source">From: ${esc(term.source)}</span>
         </div>
       ` : ''}
-    </div>
+    </article>
   `;
 }
 

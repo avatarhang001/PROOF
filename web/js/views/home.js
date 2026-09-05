@@ -22,6 +22,8 @@ export async function screen(root) {
   const verified = skills.filter(s => s.verified).length;
   const xp = Number(u.xp || u.xpTotal || 0);
   const level = Number(u.level || Math.max(1, Math.floor(xp / 500) + 1));
+  const walletMode = u.wallet?.mode || app.me?.walletMode || '';
+  const walletLabel = walletMode === 'nimiqpay' ? 'Nimiq Pay' : walletMode === 'hub' ? 'Nimiq Hub' : walletMode === 'demo' ? 'Demo wallet' : 'Connect wallet';
 
   root.innerHTML = `
   <main class="reference-home">
@@ -30,7 +32,7 @@ export async function screen(root) {
       <div class="reference-search"><span class="search-icon">⌕</span><input placeholder="Search skills, proofs, users, or paths…" aria-label="Search"/><span class="search-shortcut">Ctrl K</span></div>
       <div class="reference-top-actions">
         <a href="#/notifications" class="reference-icon-btn" aria-label="Notifications">${ico.bell}${app.unread ? `<span class="reference-notification-badge">${app.unread}</span>` : ''}</a>
-        <button class="btn reference-wallet" id="referenceWallet">${ico.wallet}<span>Connect wallet</span></button>
+        <button class="btn reference-wallet" id="referenceWallet" aria-label="${walletLabel}">${ico.wallet}<span>${walletLabel}</span></button>
         <a href="#/profile" class="reference-profile" aria-label="Open profile"><span class="reference-avatar">${u.avatar || '👤'}</span><span class="reference-caret">⌄</span></a>
       </div>
     </header>
@@ -40,7 +42,12 @@ export async function screen(root) {
 
   $('#referenceWallet', root)?.addEventListener('click', () => walletEntry(root));
   root.querySelector('#continuePath')?.addEventListener('click', () => { if (cont) location.hash = `#/learn/path/${cont.id}`; else location.hash = '#/learn'; });
-  root.querySelector('#todayProof')?.addEventListener('click', () => { if (!daily.done) location.hash = '#/daily'; });
+  root.querySelector('#todayProof')?.addEventListener('click', (event) => {
+    // Keep the secondary “View all” link usable instead of turning every
+    // click inside the card into the daily-proof route.
+    if (event.target.closest('a')) return;
+    if (!daily.done) location.hash = '#/daily';
+  });
   root.querySelectorAll('[data-skill]').forEach(n => n.addEventListener('click', () => generateAndOpenPath({ goal:`I want to learn ${n.dataset.skill}`, anchor:document.getElementById('app') }).catch(e => toast(esc(e.message),'bad'))));
 }
 

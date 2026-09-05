@@ -4,7 +4,7 @@
  */
 import { api } from '../api.js';
 import { app } from '../state.js';
-import { esc, $, $$, ico, toast, fmtNim } from '../ui.js';
+import { esc, $, $$, ico, toast, fmtNim, pageHeader } from '../ui.js';
 
 /**
  * Reviews hub - shows due reviews and stats
@@ -18,11 +18,14 @@ export async function hub(root) {
   const { reviews, count } = reviewsRes;
   const { stats } = statsRes;
 
-  root.innerHTML = `<div class="pad" style="padding-top:max(16px, env(safe-area-inset-top))">
-    <div class="row-between" style="margin-bottom:16px">
-      <h1 class="h1">Reviews</h1>
-      <a href="#/learn" class="btn btn-ghost btn-sm">${ico.back} Learning</a>
-    </div>
+  root.innerHTML = `<div class="reference-page reference-reviews pad" style="padding-top:max(16px, env(safe-area-inset-top))">
+    ${pageHeader({
+      eyebrow: 'MAKE IT STICK',
+      title: 'Reviews',
+      description: 'Short retrieval sessions keep hard-won knowledge available when you need it.',
+      backHref: '#/learn',
+      backLabel: 'Learning',
+    })}
 
     ${statsCard(stats)}
 
@@ -80,7 +83,7 @@ export async function hub(root) {
 }
 
 function statsCard(stats) {
-  return `<div class="card" style="padding:16px">
+  return `<div class="card reference-review-stats" style="padding:16px">
     <div class="row" style="gap:12px;align-items:center">
       <div class="avatar av-48" style="background:var(--primary-grad);color:#fff;font-size:24px">📚</div>
       <div style="flex:1">
@@ -130,7 +133,7 @@ export async function session(root, { id }) {
     const currentReview = reviewsRes.reviews.find(r => r.id === id);
     
     if (!currentReview) {
-      root.innerHTML = `<div class="pad center" style="padding-top:max(80px, env(safe-area-inset-top))">
+      root.innerHTML = `<div class="reference-page reference-reading reference-review-session pad center" style="padding-top:max(80px, env(safe-area-inset-top))">
         <div class="card" style="max-width:400px;padding:32px;text-align:center">
           <div style="font-size:48px;margin-bottom:16px">❓</div>
           <h2 class="h2">Review not found</h2>
@@ -141,13 +144,17 @@ export async function session(root, { id }) {
       return;
     }
 
-    root.innerHTML = `<div class="pad" style="padding-top:max(16px, env(safe-area-inset-top))">
-      <div class="row-between" style="margin-bottom:16px">
-        <a href="#/reviews" class="btn btn-ghost btn-sm">${ico.back} Reviews</a>
-        <span class="chip">${currentReview.repetitions} reviews · EF ${currentReview.easeFactor.toFixed(1)}</span>
-      </div>
+    root.innerHTML = `<div class="reference-page reference-reading reference-review-session pad" style="padding-top:max(16px, env(safe-area-inset-top))">
+      ${pageHeader({
+        eyebrow: 'ACTIVE RECALL',
+        title: 'Review session',
+        description: `${currentReview.topicTitle} · Try to retrieve it before you reveal the answer.`,
+        backHref: '#/reviews',
+        backLabel: 'Reviews',
+        actions: `<span class="chip">${currentReview.repetitions} reviews · EF ${currentReview.easeFactor.toFixed(1)}</span>`,
+      })}
 
-      <div class="card review-card" style="padding:24px;text-align:center;min-height:300px;display:flex;flex-direction:column;justify-content:center">
+      <div class="card review-card reference-flashcard" style="padding:24px;text-align:center;min-height:300px;display:flex;flex-direction:column;justify-content:center">
         <span class="chip chip-primary" style="margin:0 auto 16px">${esc(currentReview.skillSlug)}</span>
         <h1 class="h1" style="margin-bottom:16px">${esc(currentReview.topicTitle)}</h1>
         <p class="sub">How well do you remember this topic?</p>
@@ -254,7 +261,7 @@ async function submitReview(root, reviewId, quality, remainingCount) {
       day: 'numeric' 
     });
 
-    root.innerHTML = `<div class="pad center" style="padding-top:max(60px, env(safe-area-inset-top))">
+    root.innerHTML = `<div class="reference-page reference-reading reference-review-complete pad center" style="padding-top:max(60px, env(safe-area-inset-top))">
       <div class="card" style="max-width:420px;padding:32px;text-align:center">
         <div style="font-size:56px;margin-bottom:16px">${quality >= 4 ? '✨' : quality >= 2 ? '💪' : '📖'}</div>
         <h2 class="h2">Review complete!</h2>

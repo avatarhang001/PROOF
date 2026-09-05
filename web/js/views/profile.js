@@ -5,7 +5,7 @@
 import { api } from '../api.js';
 import { app, refreshMe } from '../state.js';
 import { WalletService } from '../wallet.js';
-import { esc, $, $$, ico, toast, sheet, fmtNim, timeAgo, walletStatusBadge, emptyState } from '../ui.js';
+import { esc, $, $$, ico, toast, sheet, fmtNim, timeAgo, walletStatusBadge, emptyState, pageHeader } from '../ui.js';
 import { walletEntry } from './onboarding.js';
 
 export async function screen(root) {
@@ -15,16 +15,15 @@ export async function screen(root) {
     api.get('/api/wallet'), api.get('/api/achievements'), api.get('/api/stats/streak'), api.get('/api/goals'), api.get('/api/badges'),
   ]);
 
-  root.innerHTML = `<div class="pad" style="padding-top:max(14px, env(safe-area-inset-top))">
-    <div class="row-between">
-      <h1 class="h1">Profile</h1>
-      <div class="row" style="gap:8px">
-        <a href="#/notifications" class="chip">${ico.bell.replace('<svg', '<svg width="15" height="15"')}${app.unread ? ` <b style="color:var(--bad)">${app.unread}</b>` : ''}</a>
-        <a href="#/leaderboard" class="chip">${ico.trophy.replace('<svg', '<svg width="15" height="15"')}</a>
-      </div>
-    </div>
+  root.innerHTML = `<div class="reference-page reference-profile-page pad" style="padding-top:max(14px, env(safe-area-inset-top))">
+    ${pageHeader({
+      eyebrow: 'YOUR PROOF PORTFOLIO',
+      title: 'Profile',
+      description: 'A living record of what you have practiced, proven, and earned.',
+      actions: `<div class="row reference-header-links" style="gap:8px"><a href="#/notifications" class="chip" aria-label="Notifications">${ico.bell.replace('<svg', '<svg width="15" height="15"')}${app.unread ? ` <b style="color:var(--bad)">${app.unread}</b>` : ''}</a><a href="#/leaderboard" class="chip" aria-label="Leaderboard">${ico.trophy.replace('<svg', '<svg width="15" height="15"')}</a></div>`,
+    })}
 
-    <div class="card mt16 card-hero" style="padding:20px">
+    <div class="card card-hero reference-profile-hero" style="padding:20px">
       <div class="row" style="gap:14px">
         <div class="avatar av-56" style="background:rgba(255,255,255,.15)">${u.avatar}</div>
         <div style="flex:1">

@@ -94,6 +94,39 @@ export const ico = {
 };
 
 /* ── shared components ── */
+
+/**
+ * Consistent page chrome for every product surface.
+ *
+ * The layout intentionally uses the Nimiq kit's compact label hierarchy and
+ * pill controls, while the indigo accent matches the PROOF dashboard. `actions`
+ * is HTML on purpose: callers use it for already-rendered wallet/status controls.
+ */
+export function pageHeader({
+  eyebrow = 'PROOF',
+  title,
+  description = '',
+  backHref = '',
+  backLabel = 'Back',
+  actions = '',
+  className = '',
+} = {}) {
+  const back = backHref
+    ? `<a class="reference-back" href="${esc(backHref)}" aria-label="${esc(backLabel)}">${ico.back}<span>${esc(backLabel)}</span></a>`
+    : `<a class="reference-mini-brand" href="#/" aria-label="PROOF home"><img src="/assets/proof-mark.svg" alt=""/><span>PROOF</span></a>`;
+  return `<header class="reference-page-header ${esc(className)}">
+    <div class="reference-page-heading">
+      ${back}
+      <div class="reference-page-copy">
+        <span class="reference-page-eyebrow">${esc(eyebrow)}</span>
+        <h1>${esc(title || '')}</h1>
+        ${description ? `<p>${esc(description)}</p>` : ''}
+      </div>
+    </div>
+    ${actions ? `<div class="reference-page-actions">${actions}</div>` : ''}
+  </header>`;
+}
+
 export function scoreRing(score, { size = 128, stroke = 10, pass = true, label = 'PASS' } = {}) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;

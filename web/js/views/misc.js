@@ -3,7 +3,7 @@
  */
 import { api } from '../api.js';
 import { app } from '../state.js';
-import { esc, $, $$, ico, toast, fmtNim, timeAgo, walletStatusBadge } from '../ui.js';
+import { esc, $, $$, ico, toast, fmtNim, timeAgo, walletStatusBadge, pageHeader } from '../ui.js';
 
 const CATS = [
   ['proofs', '🎯 Most proofs'], ['score', '📐 Best average'], ['consistent', '🔥 Most consistent'],
@@ -12,13 +12,16 @@ const CATS = [
 
 export async function leaderboardScreen(root) {
   let cat = 'proofs';
-  root.innerHTML = `<div class="pad bento-read" style="padding-top:max(14px, env(safe-area-inset-top))">
-    <div class="row-between">
-      <button class="btn btn-ghost btn-sm" onclick="history.back()">${ico.back} Back</button>
-      <div id="walletStatusPlaceholder"></div>
-    </div>
-    <p class="sub mt8">Ranked by demonstrated ability — never by self-claims.</p>
-    <div class="chip-scroll mt16" style="margin:0 -18px" id="cats">
+  root.innerHTML = `<div class="reference-page reference-reading reference-leaderboard pad" style="padding-top:max(14px, env(safe-area-inset-top))">
+    ${pageHeader({
+      eyebrow: 'EARNED, NOT CLAIMED',
+      title: 'Leaderboard',
+      description: 'Ranked by demonstrated ability — never by self-claims.',
+      backHref: '#/profile',
+      backLabel: 'Profile',
+      actions: '<div id="walletStatusPlaceholder"></div>',
+    })}
+    <div class="chip-scroll reference-tabs" id="cats">
       ${CATS.map(([id, label]) => `<button class="chip ${id === cat ? 'chip-primary' : ''}" data-cat="${id}">${label}</button>`).join('')}
     </div>
     <div id="lbBody" class="mt16"></div>
@@ -55,12 +58,15 @@ function notificationIcon(notification) {
 
 export async function notificationsScreen(root) {
   const { notifications, unread } = await api.get('/api/notifications');
-  root.innerHTML = `<div class="pad bento-read notifications-page" style="padding-top:max(14px, env(safe-area-inset-top))">
-    <div class="notifications-head">
-      <div class="row" style="gap:10px"><button class="btn btn-ghost btn-sm" onclick="history.back()">${ico.back} Back</button><span class="notification-page-title">${ico.bell}<span>Notifications</span>${unread ? `<b class="notification-count">${unread > 99 ? '99+' : unread}</b>` : ''}</span></div>
-      <button class="btn btn-soft btn-sm" id="readAll" ${unread ? '' : 'disabled'}>Mark read</button>
-    </div>
-    <div id="walletStatusPlaceholder" class="mt8"></div>
+  root.innerHTML = `<div class="reference-page reference-reading reference-notifications pad notifications-page" style="padding-top:max(14px, env(safe-area-inset-top))">
+    ${pageHeader({
+      eyebrow: unread ? `${unread} UNREAD` : 'YOU’RE UP TO DATE',
+      title: 'Notifications',
+      description: 'Updates about reviews, proofs, rewards, and opportunities.',
+      backHref: '#/',
+      backLabel: 'Home',
+      actions: `<button class="btn btn-soft btn-sm" id="readAll" ${unread ? '' : 'disabled'}>Mark read</button><div id="walletStatusPlaceholder"></div>`,
+    })}
     <div class="stack mt16 notification-list">
       ${notifications.map((n) => `
         <article class="card notification-item ${n.read ? 'is-read' : 'is-unread'}">
@@ -83,11 +89,18 @@ export async function notificationsScreen(root) {
 export async function publicProfileScreen(root, { username }) {
   let profile;
   try { profile = (await api.get(`/api/profile/${encodeURIComponent(username)}`)).profile; }
-  catch { root.innerHTML = `<div class="pad mt24 center"><div style="font-size:40px">🔍</div><p class="sub mt8">Proofer not found.</p></div>`; return; }
+  catch { root.innerHTML = `<div class="reference-page reference-reading reference-public-profile pad mt24 center"><div class="card"><div class="empty"><span class="big">🔍</span><b>Proofer not found</b><span class="sub">This public profile may have moved or is not available.</span><a class="btn btn-soft mt12" href="#/">Go home</a></div></div></div>`; return; }
 
-  root.innerHTML = `<div class="pad bento-read" style="padding-top:max(14px, env(safe-area-inset-top))">
-    <div class="row-between"><button class="btn btn-ghost btn-sm" onclick="history.back()">${ico.back} Back</button><div id="walletStatusPlaceholder"></div></div>
-    <div class="card card-hero mt16" style="padding:22px 20px;text-align:center">
+  root.innerHTML = `<div class="reference-page reference-reading reference-public-profile pad" style="padding-top:max(14px, env(safe-area-inset-top))">
+    ${pageHeader({
+      eyebrow: 'VERIFIED PROOFER',
+      title: profile.username,
+      description: 'A public record of earned skill evidence.',
+      backHref: '#/',
+      backLabel: 'Home',
+      actions: '<div id="walletStatusPlaceholder"></div>',
+    })}
+    <div class="card card-hero reference-public-profile-hero" style="padding:22px 20px;text-align:center">
       <div class="avatar av-56" style="margin:0 auto;background:rgba(255,255,255,.15);font-size:30px">${profile.avatar}</div>
       <h1 class="h1 mt8" style="color:#fff">${esc(profile.username)}</h1>
       <div class="tiny" style="color:rgba(255,255,255,.65)">Level ${profile.level} · ⭐ reputation ${profile.reputation} · ${fmtNim(profile.earnedNim, 1)} NIM earned</div>

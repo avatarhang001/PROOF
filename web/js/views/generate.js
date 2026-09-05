@@ -14,7 +14,7 @@ const STEPS = [
 ];
 
 export function showGenerating(anchor, goal) {
-  const overlay = el(`<div class="screen" style="position:absolute;inset:0;background:var(--grad-hero);color:#fff;z-index:80;display:flex;flex-direction:column;justify-content:center;padding:32px">
+  const overlay = el(`<div class="screen reference-generating" style="position:absolute;inset:0;background:var(--grad-hero);color:#fff;z-index:80;display:flex;flex-direction:column;justify-content:center;padding:32px">
     <div class="eyebrow" style="color:rgba(255,255,255,.55)">PROOF ENGINE</div>
     <h2 class="display mt8" style="color:#fff">Designing your<br/>skill path…</h2>
     <p class="sub" style="color:rgba(255,255,255,.7);margin-top:8px">“${esc(goal)}”</p>

@@ -3,24 +3,23 @@
  */
 import { api } from '../api.js';
 import { refreshMe, app } from '../state.js';
-import { esc, $, $$, ico, toast, sheet, confettiBurst, fmtNim, timeAgo, walletStatusBadge } from '../ui.js';
+import { esc, $, $$, ico, toast, sheet, confettiBurst, fmtNim, timeAgo, walletStatusBadge, pageHeader } from '../ui.js';
 import { openTask } from './home.js';
 
 export async function hub(root, { tab = 'market' } = {}) {
-  root.innerHTML = `<div class="pad" style="padding-top:max(16px, env(safe-area-inset-top))">
-    <div class="row-between">
-      <div>
-        <h1 class="h1 bento-full">Work</h1>
-        <p class="sub mt8 bento-full">Your verified skills are worth something. Here's where.</p>
-      </div>
-      <div id="walletStatusPlaceholder"></div>
+  root.innerHTML = `<div class="reference-page reference-work pad" style="padding-top:max(16px, env(safe-area-inset-top))">
+    ${pageHeader({
+      eyebrow: 'TURN PROOF INTO OPPORTUNITY',
+      title: 'Work',
+      description: 'Find paid tasks, teach your skill, or join a sponsored challenge.',
+      actions: '<div id="walletStatusPlaceholder"></div>',
+    })}
+    <div class="chip-row reference-tabs bento-full" id="tabs">
+      <button class="chip ${tab === 'market' ? 'chip-primary' : ''}" data-tab="market" aria-pressed="${tab === 'market'}">💼 Find work</button>
+      <button class="chip ${tab === 'teach' ? 'chip-primary' : ''}" data-tab="teach" aria-pressed="${tab === 'teach'}">🎓 Teach</button>
+      <button class="chip ${tab === 'sponsored' ? 'chip-primary' : ''}" data-tab="sponsored" aria-pressed="${tab === 'sponsored'}">🏆 Sponsored</button>
     </div>
-    <div class="chip-row mt16 bento-full" id="tabs">
-      <button class="chip ${tab === 'market' ? 'chip-primary' : ''}" data-tab="market">💼 Find work</button>
-      <button class="chip ${tab === 'teach' ? 'chip-primary' : ''}" data-tab="teach">🎓 Teach</button>
-      <button class="chip ${tab === 'sponsored' ? 'chip-primary' : ''}" data-tab="sponsored">🏆 Sponsored</button>
-    </div>
-    <div id="tabBody" class="mt16 bento-full">${spinnerHtml()}</div>
+    <div id="tabBody" class="reference-work-body bento-full">${spinnerHtml()}</div>
   </div>`;
 
   // Add wallet status display
@@ -47,7 +46,7 @@ async function renderMarket(body) {
   const tasks = Array.isArray(tasksRes?.tasks) ? tasksRes.tasks : [];
   const applied = Array.isArray(myRes?.applied) ? myRes.applied : [];
   body.innerHTML = `
-    <div class="card" style="padding:14px 16px;background:var(--nimiq-blue-bg, linear-gradient(120deg,#1F2348,#5F4B8B));color:#fff;border:0">
+    <div class="card reference-market-balance" style="padding:14px 16px;background:var(--nimiq-blue-bg, linear-gradient(120deg,#1F2348,#5F4B8B));color:#fff;border:0">
       <div class="row-between">
         <div><span class="eyebrow" style="color:rgba(255,255,255,.55)">YOUR BALANCE</span>
           <div style="font-size:22px;font-weight:850;margin-top:2px">${fmtNim(walletRes?.balanceNim ?? 0, 2)} NIM</div></div>
@@ -86,7 +85,7 @@ async function renderMarket(body) {
 
 function taskCard(t) {
   const q = t.qualification;
-  return `<div class="card card-click" data-task-open="${t.id}" style="padding:15px 16px">
+  return `<div class="card card-click reference-task-card" data-task-open="${t.id}" style="padding:15px 16px">
     <div class="row-between">
       <div style="flex:1;min-width:0">
         <b style="font-size:14.5px">${esc(t.title)}</b>

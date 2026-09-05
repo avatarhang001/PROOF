@@ -4,7 +4,7 @@
  */
 import { api } from '../api.js';
 import { refreshMe, app } from '../state.js';
-import { esc, el, $, $$, ico, toast, sheet, confettiBurst, countUp, animateRings, scoreRing, fmtNim, timeAgo, walletStatusBadge, emptyState } from '../ui.js';
+import { esc, el, $, $$, ico, toast, sheet, confettiBurst, countUp, animateRings, scoreRing, fmtNim, timeAgo, walletStatusBadge, emptyState, pageHeader } from '../ui.js';
 
 export async function hub(root) {
   const [pathsRes, dailyRes, attemptsRes, sponsoredRes] = await Promise.all([
@@ -21,16 +21,15 @@ export async function hub(root) {
   }
   proofs.sort((a, b) => a.d.index - b.d.index);
 
-  root.innerHTML = `<div class="pad" style="padding-top:max(16px, env(safe-area-inset-top))">
-    <div class="row-between" style="margin-bottom:16px">
-      <div>
-        <h1 class="h1">Prove your skill</h1>
-        <p class="sub mt8">Watching lessons proves nothing. These do.</p>
-      </div>
-      <div id="walletStatusPlaceholder"></div>
-    </div>
+  root.innerHTML = `<div class="reference-page reference-prove pad" style="padding-top:max(16px, env(safe-area-inset-top))">
+    ${pageHeader({
+      eyebrow: 'DEMONSTRATE, DON’T DECLARE',
+      title: 'Prove your skill',
+      description: 'Practical challenges, evaluated on the server and rewarded in NIM.',
+      actions: '<div id="walletStatusPlaceholder"></div>',
+    })}
 
-    <div class="card mt16 card-click ${dailyRes.done ? '' : ''}" id="dailyCard" style="${dailyRes.done ? 'opacity:.8' : 'box-shadow:0 10px 30px rgba(233,178,19,.2);border-color:rgba(233,178,19,.4);border-width:2px'}">
+    <div class="card card-click reference-daily-proof ${dailyRes.done ? '' : ''}" id="dailyCard" style="${dailyRes.done ? 'opacity:.8' : 'box-shadow:0 10px 30px rgba(233,178,19,.2);border-color:rgba(233,178,19,.4);border-width:2px'}">
       <div class="row-between" style="margin-bottom:10px">
         <span class="eyebrow">TODAY'S PROOF</span>
         <span class="chip chip-nim" style="font-weight:800">${ico.coin} +${dailyRes.challenge.rewardNim} NIM</span>
@@ -40,7 +39,7 @@ export async function hub(root) {
         ${dailyRes.done ? '<span class="chip chip-ok" style="padding:6px 12px">✓</span>' : `<span class="btn btn-nim btn-sm">Start proof</span>`}</div>
     </div>
 
-    <div class="section"><div class="section-head"><span class="eyebrow">🎯 YOUR PROOF CHECKPOINTS</span></div>
+    <div class="section reference-proof-queue"><div class="section-head"><span class="eyebrow">YOUR PROOF CHECKPOINTS</span></div>
       ${proofs.length ? `<div class="stack">${proofs.slice(0, 6).map(({ p, d, i }) => `
         <div class="card card-click" data-ch="${i.challengeId}" style="padding:16px 18px">
           <div class="row-between">
@@ -52,7 +51,7 @@ export async function hub(root) {
       : `<div class="card"><div class="empty"><span class="big">🗺️</span><b style="font-size:14px;display:block;margin-top:8px">No proofs queued yet</b><span class="sub">Start learning to unlock proof checkpoints with real rewards.</span><a href="#/learn" class="btn btn-soft mt12" style="display:inline-flex">Start Learning</a></div></div>`}
     </div>
 
-    <div class="section"><div class="section-head"><span class="eyebrow">💰 SPONSORED CHALLENGES</span></div>
+    <div class="section reference-sponsored-challenges"><div class="section-head"><span class="eyebrow">SPONSORED CHALLENGES</span></div>
       ${sponsoredRes.sponsored.length ? `<div class="stack">${sponsoredRes.sponsored.map((s) => `
         <div class="card" style="padding:16px 18px">
           <div class="row-between" style="margin-bottom:10px"><div class="row" style="gap:12px;align-items:center;min-width:0;flex:1"><span style="font-size:24px;line-height:1;flex-shrink:0">${s.emoji}</span><b style="font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis">${esc(s.title)}</b></div>
@@ -100,7 +99,7 @@ export async function challengeScreen(root, { id }) {
       const r = await api.get(`/api/challenges/${id}`);
       ch = r.challenge; openAttemptId = r.openAttemptId;
     }
-  } catch (e) { root.innerHTML = `<div class="pad mt24 center"><p class="sub">${esc(e.message)}</p></div>`; return; }
+  } catch (e) { root.innerHTML = `<div class="reference-page reference-reading reference-proof-runner pad mt24 center"><div class="card"><div class="empty"><span class="big">⚠️</span><b>We couldn’t open that proof</b><span class="sub">${esc(e.message)}</span><a class="btn btn-soft mt12" href="#/prove">Back to proofs</a></div></div></div>`; return; }
 
   let attemptId = openAttemptId;
   if (!attemptId) {
@@ -112,19 +111,23 @@ export async function challengeScreen(root, { id }) {
         root.innerHTML = rateLimited(e.retryInMs, ch);
         return;
       }
-      root.innerHTML = `<div class="pad mt24 center"><p class="sub">${esc(e.message)}</p></div>`;
+      root.innerHTML = `<div class="reference-page reference-reading reference-proof-runner pad mt24 center"><div class="card"><div class="empty"><span class="big">⚠️</span><b>We couldn’t start that proof</b><span class="sub">${esc(e.message)}</span><a class="btn btn-soft mt12" href="#/prove">Back to proofs</a></div></div></div>`;
       return;
     }
   }
 
   const fields = ch.submissionFields || ['text'];
   const isCode = fields.includes('code');
-  root.innerHTML = `<div class="pad" style="padding-top:max(14px, env(safe-area-inset-top))">
-    <div class="row-between bento-full">
-      <button class="btn btn-ghost btn-sm" id="back">${ico.back} Back</button>
-      <div id="walletStatusPlaceholder"></div>
-    </div>
-    <div class="row-between bento-full mt12">
+  root.innerHTML = `<div class="reference-page reference-proof-runner pad" style="padding-top:max(14px, env(safe-area-inset-top))">
+    ${pageHeader({
+      eyebrow: ch.kind === 'final' ? 'FINAL ASSESSMENT' : ch.kind === 'project' ? 'PROJECT PROOF' : ch.kind === 'daily' ? 'TODAY’S PROOF' : 'PROOF CHECKPOINT',
+      title: ch.title,
+      description: 'Work in your own words. Your submission is checked against a server-side rubric.',
+      backHref: '#/prove',
+      backLabel: 'Proofs',
+      actions: '<div id="walletStatusPlaceholder"></div>',
+    })}
+    <div class="row-between bento-full reference-challenge-status">
       <div></div>
       <div class="row" style="gap:10px;flex-wrap:wrap;justify-content:flex-end">
         ${ch.rewardNim ? `<span class="chip chip-nim" style="font-weight:800">${ico.coin} ${ch.rewardNim} NIM reward</span>` : `<span class="chip chip-primary">+${ch.xp} XP</span>`}
@@ -132,15 +135,11 @@ export async function challengeScreen(root, { id }) {
       </div>
     </div>
 
-    <div class="mt16 bento-full">
-      <div class="card" style="background:var(--tint-gold, rgba(233,178,19,.13));border-color:rgba(233,178,19,.4);padding:12px 16px;display:inline-flex;align-items:center;gap:8px">
-        <span style="font-size:18px">${ch.kind === 'final' ? '🏆' : ch.kind === 'project' ? '🛠️' : ch.kind === 'daily' ? '🎯' : '🎯'}</span>
-        <span class="eyebrow" style="color:var(--nim-deep);margin:0">${ch.kind === 'final' ? 'FINAL ASSESSMENT' : ch.kind === 'project' ? 'PROJECT PROOF' : ch.kind === 'daily' ? "TODAY'S PROOF" : 'PROOF CHECKPOINT'}</span>
-      </div>
-      <h1 class="h1 mt12" style="font-size:24px">${esc(ch.title)}</h1>
+    <div class="reference-challenge-identity bento-full">
+      <span class="reference-challenge-kind"><span>${ch.kind === 'final' ? '🏆' : ch.kind === 'project' ? '🛠️' : '🎯'}</span>${ch.kind === 'final' ? 'Final assessment' : ch.kind === 'project' ? 'Project proof' : ch.kind === 'daily' ? 'Daily proof' : 'Proof checkpoint'}</span>
     </div>
 
-    <div class="card mt16">
+    <div class="card reference-challenge-brief">
       <p style="margin:0;font-size:15.5px;line-height:1.6;color:var(--ink)">${esc(ch.brief)}</p>
       ${ch.requirements?.length ? `<div class="mt16"><span class="eyebrow" style="color:var(--ink-2)">REQUIREMENTS</span><ul class="reqs">${ch.requirements.map((r) => `<li><span class="tick">✓</span> ${esc(r)}</li>`).join('')}</ul></div>` : ''}
       <div class="divider"></div>
@@ -151,7 +150,7 @@ export async function challengeScreen(root, { id }) {
       </div>
     </div>
 
-    <div class="mt20">
+    <section class="reference-challenge-workspace bento-full">
       ${isCode ? `<div class="field"><label class="label">Your ${ch.type === 'html' ? 'HTML' : 'code'}</label>
         <textarea id="fCode" class="input input-mono" spellcheck="false" style="min-height:280px" placeholder="${esc(ch.type === 'html' ? '<!DOCTYPE html>\n<html lang="en">\n  … build it here …' : 'function isPalindrome(text) {\n  …\n}')}"></textarea></div>` : ''}
       ${fields.includes('explanation') ? `<div class="field"><label class="label">Edge cases — how did you handle them? <span class="tiny">(2–3 sentences)</span></label>
@@ -159,10 +158,10 @@ export async function challengeScreen(root, { id }) {
       ${fields.includes('text') ? `<div class="field"><label class="label">Your submission <span class="tiny">(<span id="wc">0</span> words)</span></label>
         <textarea id="fText" class="input" style="min-height:220px;font-size:15px;line-height:1.6" placeholder="${esc(textPlaceholder(ch))}"></textarea></div>` : ''}
       <button class="btn btn-primary btn-block" id="submit" style="padding:16px;font-size:15.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:10px">Submit my proof ${ico.send.replace('<svg', '<svg width="18" height="18"')}</button>
-      <div class="card mt12" style="background:var(--surface-2);border-color:var(--line-2);padding:14px">
+      <div class="card mt12 reference-proof-integrity" style="background:var(--surface-2);border-color:var(--line-2);padding:14px">
         <p class="tiny" style="margin:0;color:var(--ink-2);line-height:1.5"><b>⌨️ Type-only proof</b> — Paste and drop are disabled. Hand-typing is verified server-side. Rubric-graded on the server, so scores can't be faked.</p>
       </div>
-    </div>
+    </section>
   </div>`;
 
   // Add wallet status display
@@ -171,7 +170,6 @@ export async function challengeScreen(root, { id }) {
     walletStatusEl2.innerHTML = walletStatusBadge(app.me?.walletMode, app.me?.walletModeIsDemo);
   }
 
-  root.querySelector('#back').addEventListener('click', () => { location.hash = '#/prove'; });
   const ta = $('#fText', root);
   ta?.addEventListener('input', () => { $('#wc', root).textContent = (ta.value.trim().match(/\S+/g) || []).length; });
   
@@ -286,10 +284,14 @@ function textPlaceholder(ch) {
 
 function rateLimited(retryInMs, ch) {
   const mins = Math.ceil(retryInMs / 60000);
-  return `<div class="pad mt24 center">
-    <div style="font-size:40px">⏳</div>
-    <p class="sub mt8">Rate limited — try again in ${mins} minute${mins > 1 ? 's' : ''}</p>
-    <p class="tiny" style="color:var(--muted)">${esc(ch.title)}</p>
+  return `<div class="reference-page reference-reading reference-rate-limited pad mt24 center">
+    <div class="card"><div class="empty">
+      <span class="big">⏳</span>
+      <b>Take a breather</b>
+      <span class="sub">This proof is available again in ${mins} minute${mins > 1 ? 's' : ''}.</span>
+      <span class="tiny">${esc(ch.title)}</span>
+      <a class="btn btn-soft mt12" href="#/prove">Explore other proofs</a>
+    </div></div>
   </div>`;
 }
 
@@ -315,18 +317,16 @@ export async function attemptScreen(root, { id }) {
   const skill = extra?.skill;
   const title = challenge?.title || attempt.challengeTitle || 'Your proof';
 
-  root.innerHTML = `<div class="pad center bento-read" style="padding-top:max(28px, env(safe-area-inset-top))">
-    <div class="row-between bento-full">
-      <button class="btn btn-ghost btn-sm" id="back">${ico.back} Back</button>
-      <div id="walletStatusPlaceholder"></div>
-    </div>
-    ${passed ? `<div class="float-reward">
-      <div class="eyebrow" style="color:var(--ok-deep)">PROOF VERIFIED</div>
-      <h1 class="display mt8" style="font-size:30px">You passed.</h1>
-    </div>` : `<div class="float-reward">
-      <div class="eyebrow" style="color:var(--warn)">NOT YET — BUT CLOSE</div>
-      <h1 class="display mt8" style="font-size:30px">Keep going.</h1>
-    </div>`}
+  root.innerHTML = `<div class="reference-page reference-reading reference-proof-result pad" style="padding-top:max(28px, env(safe-area-inset-top))">
+    ${pageHeader({
+      eyebrow: passed ? 'PROOF VERIFIED' : 'READY FOR ANOTHER TRY',
+      title: passed ? 'You passed.' : 'Keep going.',
+      description: title,
+      backHref: '#/prove',
+      backLabel: 'Proofs',
+      actions: '<div id="walletStatusPlaceholder"></div>',
+    })}
+    <div class="reference-result-lead ${passed ? 'is-passed' : 'is-pending'}"><span>${passed ? 'Your demonstrated ability is now part of your profile.' : 'Every attempt is feedback. Use it to make the next proof stronger.'}</span></div>
 
     <div class="mt16" style="display:flex;justify-content:center">${scoreRing(Math.round(evaluation?.score || 0), { pass: passed, label: passed ? 'PASS' : 'KEEP GOING' })}</div>
 
@@ -372,7 +372,6 @@ export async function attemptScreen(root, { id }) {
 
   animateRings(root);
   if (passed) setTimeout(() => confettiBurst(), 250);
-  root.querySelector('#back')?.addEventListener('click', () => { location.hash = '#/prove'; });
   root.querySelector('#retry')?.addEventListener('click', () => { location.hash = `#/prove/challenge/${attempt.challengeId}`; });
   root.querySelector('#copyProof')?.addEventListener('click', async () => {
     const pid = extra?.proof?.publicId;

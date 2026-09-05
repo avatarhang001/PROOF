@@ -3,7 +3,7 @@
  */
 import { api } from '../api.js';
 import { app } from '../state.js';
-import { esc, el, $, $$, ico, toast, fmtNim, walletStatusBadge } from '../ui.js';
+import { esc, el, $, $$, ico, toast, fmtNim, walletStatusBadge, pageHeader } from '../ui.js';
 import { generateAndOpenPath } from './generate.js';
 import { startSocraticSession } from './socratic.js';
 
@@ -53,11 +53,13 @@ export async function hub(root) {
   const paths = pathsRes.paths;
   const streak = streakRes.streak;
   
-  root.innerHTML = `<div class="pad" style="padding-top:max(16px, env(safe-area-inset-top))">
-    <div class="row-between" style="margin-bottom:16px">
-      <h1 class="h1">Learning</h1>
-      <div id="walletStatusPlaceholder"></div>
-    </div>
+  root.innerHTML = `<div class="reference-page reference-learn pad" style="padding-top:max(16px, env(safe-area-inset-top))">
+    ${pageHeader({
+      eyebrow: 'BUILD YOUR CAPABILITY',
+      title: 'Learning',
+      description: 'Pick up practical skills, then prove you can use them.',
+      actions: '<div id="walletStatusPlaceholder"></div>',
+    })}
 
     ${streakWidget(streak)}
 
@@ -113,7 +115,7 @@ function streakWidget(streak) {
   const emoji = streak.emoji;
   const barColor = streak.atRisk ? 'var(--warn)' : 'var(--ok)';
   const message = streak.atRisk ? 'Complete a lesson today to keep your streak alive!' : `${streak.currentStreak} days strong! Keep learning to maintain your streak.`;
-  return `<div class="card" style="padding:14px 16px;background:linear-gradient(135deg, rgba(33,188,165,.1) 0%, #FFF 100%);border:1px solid rgba(33,188,165,.35);margin-bottom:12px"><div class="row" style="gap:10px;align-items:center"><span style="font-size:24px">${emoji}</span><div style="flex:1"><div class="row" style="gap:6px;align-items:baseline"><b style="font-size:15px;color:var(--ink)">${streak.currentStreak}-day streak</b>${streak.atRisk ? `<span class="chip" style="background:var(--warn-soft);color:var(--warn);padding:2px 6px;font-size:9px;font-weight:800">AT RISK</span>` : ''}</div><div class="tiny" style="color:var(--ink-2);margin-top:2px">${message}</div></div><div style="text-align:center;min-width:42px"><b class="num" style="font-size:20px;color:${barColor};display:block">${streak.currentStreak}</b><span class="tiny" style="color:var(--muted);font-size:9px">DAYS</span></div></div></div>`;
+  return `<div class="card reference-streak-card" style="padding:14px 16px;background:linear-gradient(135deg, rgba(33,188,165,.1) 0%, #FFF 100%);border:1px solid rgba(33,188,165,.35);margin-bottom:12px"><div class="row" style="gap:10px;align-items:center"><span style="font-size:24px">${emoji}</span><div style="flex:1"><div class="row" style="gap:6px;align-items:baseline"><b style="font-size:15px;color:var(--ink)">${streak.currentStreak}-day streak</b>${streak.atRisk ? `<span class="chip" style="background:var(--warn-soft);color:var(--warn);padding:2px 6px;font-size:9px;font-weight:800">AT RISK</span>` : ''}</div><div class="tiny" style="color:var(--ink-2);margin-top:2px">${message}</div></div><div style="text-align:center;min-width:42px"><b class="num" style="font-size:20px;color:${barColor};display:block">${streak.currentStreak}</b><span class="tiny" style="color:var(--muted);font-size:9px">DAYS</span></div></div></div>`;
 }
 
 function showGoalModal(callback) {
@@ -137,15 +139,24 @@ function showGoalModal(callback) {
 }
 
 function pathCard(p) {
-  return `<div class="card card-click" data-path="${p.id}" style="padding:18px"><div class="row-between" style="margin-bottom:10px"><span class="chip chip-primary">${p.skillEmoji} ${esc(p.skillName)}</span><span class="tiny" style="white-space:nowrap;opacity:.7">${p.days.length} days · ${fmtNim(p.rewardNim ?? 0)} NIM</span></div><b style="display:block;font-size:16px;font-weight:700;line-height:1.3">${esc(p.title)}</b><div class="row mt12" style="gap:10px;align-items:center"><div class="bar" style="flex:1"><i style="width:${p.percent}%"></i></div><span class="tiny num" style="font-weight:800;color:var(--primary)">${p.percent}%</span></div></div>`;
+  return `<div class="card card-click reference-path-card" data-path="${p.id}" style="padding:18px"><div class="row-between" style="margin-bottom:10px"><span class="chip chip-primary">${p.skillEmoji} ${esc(p.skillName)}</span><span class="tiny" style="white-space:nowrap;opacity:.7">${p.days.length} days · ${fmtNim(p.rewardNim ?? 0)} NIM</span></div><b style="display:block;font-size:16px;font-weight:700;line-height:1.3">${esc(p.title)}</b><div class="row mt12" style="gap:10px;align-items:center"><div class="bar" style="flex:1"><i style="width:${p.percent}%"></i></div><span class="tiny num" style="font-weight:800;color:var(--primary)">${p.percent}%</span></div></div>`;
 }
 
 export async function pathScreen(root, { id }) {
   const { path: p } = await api.get(`/api/paths/${id}`);
-  root.innerHTML = `<div class="pad" style="padding-top:max(14px, env(safe-area-inset-top))"><div class="row-between"><button class="btn btn-ghost btn-sm" id="back">${ico.back} Learning</button><div id="walletStatusPlaceholder"></div></div><div class="row-between mt8"><div></div><span class="chip chip-nim">${ico.coin} ${fmtNim(p.rewardNim ?? 0)} NIM in this path</span></div><div class="card card-hero mt16" style="padding:20px"><div style="font-size:30px">${p.skillEmoji}</div><h1 class="h1 mt8" style="color:#fff">${esc(p.title)}</h1><p class="sub mt8" style="color:rgba(255,255,255,.72)">${esc(p.description)}</p><div class="row mt12" style="gap:10px;align-items:center"><div class="bar" style="flex:1;background:rgba(255,255,255,.2)"><i style="width:${p.percent}%;background:var(--nim-grad)"></i></div><b class="num" style="color:#fff;font-size:14px">${p.percent}%</b></div><div class="row mt12" style="gap:8px;flex-wrap:wrap"><span class="chip chip-dark">${p.level}</span><span class="chip chip-dark">${p.minutesPerDay} min/day</span><span class="chip chip-dark">${p.totalXp} XP total</span></div></div><div class="section bento-full"><div class="section-head"><span class="eyebrow">${p.days.length}-DAY SKILL PATH</span><span class="tiny">tap a day</span></div><div>${p.days.map((d) => dayBlock(p, d)).join('')}</div></div></div>`;
+  root.innerHTML = `<div class="reference-page reference-path pad" style="padding-top:max(14px, env(safe-area-inset-top))">
+    ${pageHeader({
+      eyebrow: 'YOUR SKILL PATH',
+      title: p.title,
+      description: 'A practical sequence of lessons, recall, and proof checkpoints.',
+      backHref: '#/learn',
+      backLabel: 'Learning',
+      actions: '<div id="walletStatusPlaceholder"></div>',
+    })}
+    <div class="reference-path-reward"><span class="chip chip-nim">${ico.coin} ${fmtNim(p.rewardNim ?? 0)} NIM available</span></div>
+    <div class="card card-hero reference-path-hero" style="padding:20px"><div style="font-size:30px">${p.skillEmoji}</div><h2 class="h1 mt8" style="color:#fff">${esc(p.title)}</h2><p class="sub mt8" style="color:rgba(255,255,255,.72)">${esc(p.description)}</p><div class="row mt12" style="gap:10px;align-items:center"><div class="bar" style="flex:1;background:rgba(255,255,255,.2)"><i style="width:${p.percent}%;background:var(--nim-grad)"></i></div><b class="num" style="color:#fff;font-size:14px">${p.percent}%</b></div><div class="row mt12" style="gap:8px;flex-wrap:wrap"><span class="chip chip-dark">${p.level}</span><span class="chip chip-dark">${p.minutesPerDay} min/day</span><span class="chip chip-dark">${p.totalXp} XP total</span></div></div><div class="section bento-full reference-path-timeline"><div class="section-head"><span class="eyebrow">${p.days.length}-DAY SKILL PATH</span><span class="tiny">Open a day to continue</span></div><div>${p.days.map((d) => dayBlock(p, d)).join('')}</div></div></div>`;
   const walletStatusEl = root.querySelector('#walletStatusPlaceholder');
   if (walletStatusEl) walletStatusEl.innerHTML = walletStatusBadge(app.me?.walletMode, app.me?.walletModeIsDemo);
-  root.querySelector('#back').addEventListener('click', () => { location.hash = '#/learn'; });
   $$('.day-head', root).forEach((h) => h.addEventListener('click', () => h.parentElement.classList.toggle('open')));
   $$('[data-challenge]', root).forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); location.hash = `#/prove/challenge/${b.dataset.challenge}`; }));
   $$('[data-lesson]', root).forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); location.hash = `#/learn/lesson/${id}/${b.dataset.lesson}?day=${b.dataset.day}`; }));
@@ -180,10 +191,9 @@ export async function lessonScreen(root, { pathId, topic }) {
 }
 
 function showPreLessonPrompt(root, pathId, topic, dayIndex, lesson, path) {
-  root.innerHTML = `<div class="pad" style="padding-top:max(14px, env(safe-area-inset-top))"><div class="row-between"><button class="btn btn-ghost btn-sm" id="back">${ico.back} Path</button><div id="walletStatusPlaceholder"></div></div><div class="pre-lesson-card"><div class="pre-lesson-icon">🎯</div><h2>Before we start...</h2><p class="pre-lesson-intro">Let's spend 2-3 minutes on a few questions about <strong>${esc(lesson.title)}</strong>.</p><p class="pre-lesson-why">This isn't a test — it helps you learn deeper by grounding what you're about to learn in your own context and experience.</p><div class="pre-lesson-benefits"><div class="benefit-item"><span class="benefit-icon">💡</span><span>Surface what you already know</span></div><div class="benefit-item"><span class="benefit-icon">🎯</span><span>Focus on what matters to you</span></div><div class="benefit-item"><span class="benefit-icon">🧠</span><span>Make connections that stick</span></div></div><div class="pre-lesson-actions"><button class="btn-primary btn-block" id="startGrilling">Start Pre-Lesson Questions</button><button class="btn-ghost btn-block mt12" id="skipGrilling">Skip and go straight to lesson</button></div></div></div>`;
+  root.innerHTML = `<div class="reference-page reference-reading reference-pre-lesson pad" style="padding-top:max(14px, env(safe-area-inset-top))">${pageHeader({ eyebrow: 'SET UP FOR DEEP LEARNING', title: lesson.title, description: 'A short check-in makes the lesson more relevant to what you already know.', backHref: `#/learn/path/${pathId}`, backLabel: 'Path', actions: '<div id="walletStatusPlaceholder"></div>' })}<div class="pre-lesson-card"><div class="pre-lesson-icon">🎯</div><h2>Before we start...</h2><p class="pre-lesson-intro">Let's spend 2-3 minutes on a few questions about <strong>${esc(lesson.title)}</strong>.</p><p class="pre-lesson-why">This isn't a test — it helps you learn deeper by grounding what you're about to learn in your own context and experience.</p><div class="pre-lesson-benefits"><div class="benefit-item"><span class="benefit-icon">💡</span><span>Surface what you already know</span></div><div class="benefit-item"><span class="benefit-icon">🎯</span><span>Focus on what matters to you</span></div><div class="benefit-item"><span class="benefit-icon">🧠</span><span>Make connections that stick</span></div></div><div class="pre-lesson-actions"><button class="btn-primary btn-block" id="startGrilling">Start Pre-Lesson Questions</button><button class="btn-ghost btn-block mt12" id="skipGrilling">Skip and go straight to lesson</button></div></div></div>`;
   const walletStatusEl = root.querySelector('#walletStatusPlaceholder');
   if (walletStatusEl) walletStatusEl.innerHTML = walletStatusBadge(app.me?.walletMode, app.me?.walletModeIsDemo);
-  root.querySelector('#back').addEventListener('click', () => { location.hash = `#/learn/path/${pathId}`; });
   root.querySelector('#startGrilling').addEventListener('click', () => { startSocraticSession('pre_lesson', topic, lesson.title, { skillSlug: path.skillSlug, lessonUrl: `#/learn/lesson/${pathId}/${topic}?day=${dayIndex}&skip_grilling=1` }); });
   root.querySelector('#skipGrilling').addEventListener('click', () => { location.hash = `#/learn/lesson/${pathId}/${topic}?day=${dayIndex}&skip_grilling=1`; });
 }
@@ -203,7 +213,7 @@ function renderLessonContent(root, pathId, topic, dayIndex, p, day, item, lesson
   const completed = new Set();
   let lessonMarkedDone = false;
 
-  root.innerHTML = `<div class="pad bento-read" style="padding-top:max(14px, env(safe-area-inset-top))"><div class="row-between"><button class="btn btn-ghost btn-sm" id="back">${ico.back} Path</button><div id="walletStatusPlaceholder"></div></div><div class="row-between mt8"><button class="btn btn-soft btn-sm" id="waitWhatBtn" style="background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn);">❓ Wait, what?</button><button class="btn btn-soft btn-sm" id="tutorBtn">${ico.chat.replace('<svg', '<svg width="16" height="16"')} Ask tutor</button></div><div class="mt16"><span class="eyebrow">DAY ${day.index} · LESSON</span><h1 class="h1 mt8">${esc(lesson.title)}</h1><div class="chip-row mt8"><span class="chip">⏱ ${lesson.estMin} min</span><span class="chip">+20 XP</span>${lesson.challenge ? `<span class="chip chip-nim">${ico.coin} ${lesson.challenge.rewardNim} NIM proof ahead</span>` : ''}</div></div><div class="stepper mt16" id="stepper">${stages.map((s, i) => `<div class="step ${i === 0 ? 'active' : ''}" data-step="${i}"><span class="step-dot">${s.icon}</span><span class="step-label">${s.label}</span></div>`).join('')}</div><div id="stageZone" class="mt16"></div><div class="row mt16" style="gap:10px" id="navRow"><button class="btn btn-ghost" style="flex:0 0 110px" id="prev">${ico.back} Back</button><button class="btn btn-primary btn-block" id="next">Next ${ico.arrow}</button></div></div>`;
+  root.innerHTML = `<div class="reference-page reference-reading reference-lesson pad" style="padding-top:max(14px, env(safe-area-inset-top))">${pageHeader({ eyebrow: `DAY ${day.index} · LESSON`, title: lesson.title, description: 'Learn it, retrieve it, then put it into practice.', backHref: `#/learn/path/${pathId}`, backLabel: 'Path', actions: '<div id="walletStatusPlaceholder"></div>' })}<div class="row-between reference-lesson-tools mt8"><button class="btn btn-soft btn-sm" id="waitWhatBtn" style="background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn);">❓ Wait, what?</button><button class="btn btn-soft btn-sm" id="tutorBtn">${ico.chat.replace('<svg', '<svg width="16" height="16"')} Ask tutor</button></div><div class="reference-lesson-meta mt16"><div class="chip-row"><span class="chip">⏱ ${lesson.estMin} min</span><span class="chip">+20 XP</span>${lesson.challenge ? `<span class="chip chip-nim">${ico.coin} ${lesson.challenge.rewardNim} NIM proof ahead</span>` : ''}</div></div><div class="stepper mt16" id="stepper">${stages.map((s, i) => `<div class="step ${i === 0 ? 'active' : ''}" data-step="${i}"><span class="step-dot">${s.icon}</span><span class="step-label">${s.label}</span></div>`).join('')}</div><div id="stageZone" class="mt16"></div><div class="row mt16" style="gap:10px" id="navRow"><button class="btn btn-ghost" style="flex:0 0 110px" id="prev">${ico.back} Back</button><button class="btn btn-primary btn-block" id="next">Next ${ico.arrow}</button></div></div>`;
 
   const zone = () => root.querySelector('#stageZone');
   const navRow = () => root.querySelector('#navRow');
@@ -211,7 +221,6 @@ function renderLessonContent(root, pathId, topic, dayIndex, p, day, item, lesson
   const prevBtn = () => root.querySelector('#prev');
   const walletStatusEl = root.querySelector('#walletStatusPlaceholder');
   if (walletStatusEl) walletStatusEl.innerHTML = walletStatusBadge(app.me?.walletMode, app.me?.walletModeIsDemo);
-  root.querySelector('#back').addEventListener('click', () => { location.hash = `#/learn/path/${pathId}`; });
   root.querySelector('#waitWhatBtn').addEventListener('click', () => { startSocraticSession('wait_what', topic, lesson.title, { skillSlug: p.skillSlug, lessonContent: lesson.lesson?.tldr || '' }); });
   root.querySelector('#tutorBtn').addEventListener('click', () => tutorChat(p.skillSlug, topic, lesson));
 

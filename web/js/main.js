@@ -29,9 +29,9 @@ const ROUTES = [
 const NAV = [
   { href: '#/', ico: 'home', label: 'Home', match: ['', 'onboarding'], mobile: true },
   { href: '#/learn', ico: 'learn', label: 'Learn', match: ['learn'], mobile: true },
-  { href: '#/reviews', ico: 'clock', label: 'Review', match: ['reviews'], mobile: true },
+  { href: '#/reviews', ico: 'clock', label: 'Review', match: ['reviews'], mobile: false },
   { href: '#/prove', ico: 'prove', label: 'Prove', match: ['prove', 'daily'], mobile: true },
-  { href: '#/work', ico: 'work', label: 'Work', match: ['work'], mobile: false },
+  { href: '#/work', ico: 'work', label: 'Work', match: ['work'], mobile: true },
   { href: '#/notifications', ico: 'bell', label: 'Notifications', match: ['notifications'], mobile: false, badge: 'notifications' },
   { href: '#/profile', ico: 'profile', label: 'You', match: ['profile'], mobile: true },
 ];
@@ -95,11 +95,15 @@ async function router() {
     if (!opts.public && !app.me) { location.hash = '#/onboarding'; return; }
     const activeKey = pp[0] || '';
     if (!opts.public) renderNav(activeKey); else { document.getElementById('bottomNav')?.remove(); navRendered = false; }
-    const screen = document.createElement('div'); screen.className = 'screen';
-    screen.innerHTML = `<div class="pad" style="padding-top:max(16px, env(safe-area-inset-top))"><div class="skeleton" style="height:120px;border-radius:20px"></div><div class="skeleton mt12" style="height:84px;border-radius:16px"></div><div class="skeleton mt12" style="height:84px;border-radius:16px"></div></div>`;
+    const screen = document.createElement('div');
+    // Route metadata gives the responsive design layer stable hooks without
+    // coupling layout decisions to individual feature views.
+    screen.className = `screen screen--${activeKey || 'home'}`;
+    screen.dataset.route = pattern || 'home';
+    screen.innerHTML = `<div class="pad reference-loading" style="padding-top:max(16px, env(safe-area-inset-top))"><div class="skeleton" style="height:120px;border-radius:20px"></div><div class="skeleton mt12" style="height:84px;border-radius:16px"></div><div class="skeleton mt12" style="height:84px;border-radius:16px"></div></div>`;
     appEl().replaceChildren(screen);
     try { await view(screen, params); }
-    catch (e) { screen.innerHTML = `<div class="pad" style="padding-top:60px;text-align:center"><div style="font-size:40px">🌧️</div><h2 class="h1 mt8">Something hiccuped</h2><p class="sub mt8">${esc(e.message || 'Please try again.')}</p><button class="btn btn-soft mt16" onclick="location.reload()">Reload</button></div>`; }
+    catch (e) { screen.innerHTML = `<div class="reference-page reference-reading pad" style="padding-top:60px;text-align:center"><div class="card"><div class="empty"><span class="big">🌧️</span><b>Something hiccuped</b><span class="sub">${esc(e.message || 'Please try again.')}</span><button class="btn btn-soft mt16" onclick="location.reload()">Reload</button></div></div></div>`; }
     window.scrollTo({ top: 0 }); return;
   }
   location.hash = '#/';
