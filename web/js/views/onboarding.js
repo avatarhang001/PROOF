@@ -7,104 +7,24 @@ import { WalletService } from '../wallet.js';
 import { esc, $, toast, ico } from '../ui.js';
 import { generateAndOpenPath } from './generate.js';
 
-const CATS = [
-  ['💻', 'Web Dev'], ['🎨', 'Design'], ['🤖', 'AI'], ['📣', 'Marketing'], ['📊', 'Data'], ['✦', 'More'],
-  ['💻', 'Coding'], ['🎵', 'Music'], ['🗣️', 'Languages'], ['💼', 'Business'], ['✍️', 'Writing'],
-];
+const CATS = [['💻','Web Dev'],['🎨','Design'],['🤖','AI'],['📣','Marketing'],['📊','Data'],['✦','More'],['💻','Coding'],['🎵','Music'],['🗣️','Languages'],['💼','Business'],['✍️','Writing']];
 
-export async function screen(root) {
-  root.innerHTML = `<div class="reference-onboarding"><div class="onb-layout">
-    <div class="onb-left">
-      <div class="onb-brand-copy">
-        <img src="/assets/proof-logo.svg" alt="PROOF" class="brand-logo" style="width:138px"/>
-        <p class="tiny" style="margin-top:12px;color:var(--ref-muted)">Build skill. Build proof. Build earning power.</p>
-      </div>
-      <section class="onb-hero">
-        <div class="onb-eyebrow">LEARN · PRACTICE · PROVE · EARN</div>
-        <h1>Learn anything.<br/>Prove it.<br/><span>Earn with it.</span></h1>
-        <p class="onb-sub">Turn your skills into verified proof and real NIM rewards.</p>
-      </section>
-    </div>
-    <section class="onb-form">
-      <div class="onb-section-head" style="margin-top:0"><b style="font-size:15px">What do you want to learn?</b><button class="onb-icon" id="btnNotifications" aria-label="Notifications">${ico.bell}<span class="reference-notification-badge" ${app.unread ? '' : 'hidden'}>${app.unread || ''}</span></button></div>
-      <div class="onb-search">
-        <span style="color:var(--ref-purple)">${ico.search}</span>
-        <input id="goalInput" placeholder="What do you want to learn?" autocomplete="off" maxlength="120"/>
-      </div>
-      <div class="onb-section-head"><b>Popular skills</b><button class="link-button" id="toggleCategories" type="button">View all</button></div>
-      <div class="onb-skills" id="skillPicks">
-        ${CATS.slice(0, 6).map(([e, l]) => `<button class="onb-skill" data-cat="${esc(l)}" type="button"><i>${e}</i><span>${esc(l)}</span></button>`).join('')}
-      </div>
-      <div class="onb-skills" id="moreCategories" hidden style="margin-top:7px">
-        ${CATS.slice(6).map(([e, l]) => `<button class="onb-skill" data-cat="${esc(l)}" type="button"><i>${e}</i><span>${esc(l)}</span></button>`).join('')}
-      </div>
-      <label class="onb-field-label" for="lvl">Your level</label>
-      <select id="lvl"><option value="">New to it</option><option value="beginner">Basics down</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select>
-      <label class="onb-field-label" for="mpd">Time per day</label>
-      <select id="mpd"><option value="20">20 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">1 hour+</option></select>
-      <button class="onb-start" id="btnStart" type="button">Start my skill path <span>${ico.arrow}</span></button>
-      <div class="onb-meta">Free to start · Earn up to 5 NIM per proof</div>
-      <div class="onboarding-value-row" style="padding-top:14px"><span>🔥 Streaks</span><span>✓ Verified skills</span><span>💼 Paid tasks</span></div>
-    </section>
-  </div>
-  <nav class="onb-bottom" aria-label="Primary navigation">
-    <a href="#/"><span>${ico.home}</span>Home</a><a href="#/learn"><span>${ico.book}</span>Learn</a><a href="#/prove"><span>${ico.prove}</span>Prove</a><a href="#/work"><span>${ico.work}</span>Work</a><a href="#/profile"><span>${ico.user}</span>Profile</a>
-  </nav></div>`;
-
-  const input = $('#goalInput', root);
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') start(); });
-  root.querySelectorAll('[data-cat]').forEach((c) => c.addEventListener('click', () => {
-    if (c.dataset.cat === 'More') { $('#toggleCategories', root).click(); return; }
-    input.value = c.dataset.cat === 'Web Dev' ? 'I want to learn web development' : `I want to learn ${c.dataset.cat.toLowerCase()}`;
-    input.focus();
-  }));
-  $('#toggleCategories', root).addEventListener('click', () => {
-    const more = $('#moreCategories', root); const open = more.hidden; more.hidden = !open;
-    $('#toggleCategories', root).textContent = open ? 'Show less' : 'View all';
-  });
-  $('#btnStart', root).addEventListener('click', start);
-  $('#btnNotifications', root).addEventListener('click', () => { location.hash = '#/notifications'; });
-
-  async function start() {
-    const goal = input.value.trim();
-    if (goal.length < 3) { toast('Tell us what you want to learn ✍️', 'bad'); input.focus(); return; }
-    const btn = $('#btnStart', root); btn.disabled = true; btn.classList.add('is-loading');
-    try {
-      const level = $('#lvl', root).value; const minutesPerDay = parseInt($('#mpd', root).value, 10);
-      if (!app.me) { await api.post('/api/onboard', { goal, level, minutesPerDay }); await refreshMe(); }
-      else await api.patch('/api/me', { prefs: { goal, level, minutesPerDay } });
-      await generateAndOpenPath({ goal, level, minutesPerDay, anchor: document.getElementById('app') });
-    } catch (e) { toast(esc(e.message), 'bad'); btn.disabled = false; btn.classList.remove('is-loading'); }
-  }
+export async function screen(root){
+  root.innerHTML=`<div class="reference-onboarding"><div class="onb-layout"><div class="onb-left"><div class="onb-brand-copy"><img src="/assets/proof-logo.svg" alt="PROOF" class="brand-logo" style="width:138px"/><p class="tiny" style="margin-top:12px;color:var(--ref-muted)">Build skill. Build proof. Build earning power.</p></div><section class="onb-hero"><div class="onb-eyebrow">LEARN · PRACTICE · PROVE · EARN</div><h1>Learn anything.<br/>Prove it.<br/><span>Earn with it.</span></h1><p class="onb-sub">Turn your skills into verified proof and real NIM rewards.</p></section></div><section class="onb-form"><div class="onb-section-head" style="margin-top:0"><b style="font-size:15px">What do you want to learn?</b><button class="onb-icon" id="btnNotifications" aria-label="Notifications">${ico.bell}<span class="reference-notification-badge" ${app.unread?'':'hidden'}>${app.unread||''}</span></button></div><div class="onb-search"><span style="color:var(--ref-purple)">⌕</span><input id="goalInput" placeholder="What do you want to learn?" autocomplete="off" maxlength="120"/></div><div class="onb-section-head"><b>Popular skills</b><button class="link-button" id="toggleCategories" type="button">View all</button></div><div class="onb-skills" id="skillPicks">${CATS.slice(0,6).map(([e,l])=>`<button class="onb-skill" data-cat="${esc(l)}" type="button"><i>${e}</i><span>${esc(l)}</span></button>`).join('')}</div><div class="onb-skills" id="moreCategories" hidden style="margin-top:7px">${CATS.slice(6).map(([e,l])=>`<button class="onb-skill" data-cat="${esc(l)}" type="button"><i>${e}</i><span>${esc(l)}</span></button>`).join('')}</div><label class="onb-field-label" for="lvl">Your level</label><select id="lvl"><option value="">New to it</option><option value="beginner">Basics down</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select><label class="onb-field-label" for="mpd">Time per day</label><select id="mpd"><option value="20">20 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">1 hour+</option></select><button class="onb-start" id="btnStart" type="button">Start my skill path <span>${ico.arrow}</span></button><div class="onb-meta">Free to start · Earn up to 5 NIM per proof</div><div class="onboarding-value-row" style="padding-top:14px"><span>🔥 Streaks</span><span>✓ Verified skills</span><span>💼 Paid tasks</span></div></section></div><nav class="onb-bottom" aria-label="Primary navigation"><a href="#/"><span>${ico.home}</span>Home</a><a href="#/learn"><span>${ico.book}</span>Learn</a><a href="#/prove"><span>${ico.prove}</span>Prove</a><a href="#/work"><span>${ico.work}</span>Work</a><a href="#/profile"><span>${ico.profile}</span>Profile</a></nav></div>`;
+  const input=$('#goalInput',root);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')start();});
+  root.querySelectorAll('[data-cat]').forEach(c=>c.addEventListener('click',()=>{if(c.dataset.cat==='More'){$('#toggleCategories',root).click();return;}input.value=c.dataset.cat==='Web Dev'?'I want to learn web development':`I want to learn ${c.dataset.cat.toLowerCase()}`;input.focus();}));
+  $('#toggleCategories',root).addEventListener('click',()=>{const more=$('#moreCategories',root);const open=more.hidden;more.hidden=!open;$('#toggleCategories',root).textContent=open?'Show less':'View all';});
+  $('#btnStart',root).addEventListener('click',start);$('#btnNotifications',root).addEventListener('click',()=>{location.hash='#/notifications';});
+  async function start(){const goal=input.value.trim();if(goal.length<3){toast('Tell us what you want to learn ✍️','bad');input.focus();return;}const btn=$('#btnStart',root);btn.disabled=true;btn.classList.add('is-loading');try{const level=$('#lvl',root).value;const minutesPerDay=parseInt($('#mpd',root).value,10);if(!app.me){await api.post('/api/onboard',{goal,level,minutesPerDay});await refreshMe();}else await api.patch('/api/me',{prefs:{goal,level,minutesPerDay}});await generateAndOpenPath({goal,level,minutesPerDay,anchor:document.getElementById('app')});}catch(e){toast(esc(e.message),'bad');btn.disabled=false;btn.classList.remove('is-loading');}}
 }
 
-/** Wallet entry used before a session exists — options adapt to the environment. */
-export async function walletEntry(root) {
-  const { sheet } = await import('../ui.js');
-  const { environment, WalletService } = await import('../wallet.js');
-  const env = environment();
-  const payBtn = `<button class="btn ${env.kind === 'nimiqpay' ? 'btn-primary' : 'btn-ghost'} btn-block" id="wNimiq">${ico.wallet} Connect Nimiq Pay</button>`;
-  const hubBtn = `<button class="btn btn-primary btn-block" id="wHub">${ico.link} Connect Nimiq Hub</button>`;
-  const demoBtn = `<button class="btn ${env.kind === 'nimiqpay' ? 'btn-soft' : 'btn-nim'} btn-block" id="wDemo">${ico.flask} Explore with demo wallet</button>`;
-  let options, note;
-  if (env.kind === 'nimiqpay') { options = payBtn + demoBtn; note = 'Running inside Nimiq Pay — your keys never leave the wallet. Rewards can be on-chain.'; }
-  else if (env.kind === 'desktop') { options = hubBtn + demoBtn + `<button class="btn btn-ghost btn-block" id="wNimiq" style="opacity:.75">${ico.bolt} Nimiq Pay <span class="tiny">· mobile app only</span></button>`; note = 'Desktop detected → use Nimiq Hub for on-chain rewards, or explore instantly with the demo wallet.'; }
-  else { options = hubBtn + demoBtn + payBtn; note = 'Use Nimiq Hub in this browser, or open PROOF inside Nimiq Pay for native wallet access.'; }
-  const s = sheet(`<h2 class="h1">Connect your wallet</h2><p class="sub mt8">Your wallet holds your NIM rewards. Keys never leave it — you approve every action.</p><div class="wallet-options mt16">${options}</div><p class="tiny center mt8 wallet-note">${note}</p>`);
-  s.el.querySelector('#wHub')?.addEventListener('click', async (e) => {
-    const btn=e.currentTarget; btn.disabled=true; btn.classList.add('is-loading'); btn.innerHTML=`${ico.link} Connecting to Nimiq Hub…`;
-    try { await WalletService.connectNimiqHub(); await refreshMe(); s.close(); toast('Nimiq Hub connected ✅ On-chain rewards enabled!', 'ok'); location.hash='#/'; }
-    catch(err){ btn.disabled=false; btn.classList.remove('is-loading'); btn.innerHTML=`${ico.link} Connect Nimiq Hub`; const msg=String(err.message||err); let hint=''; if(msg.includes('HUB_TIMEOUT')||msg.includes('Connection was closed'))hint='Hub popup timed out. Click again to retry.'; else if(msg.includes('timeout')||msg.includes('popup'))hint='Popup may be blocked. Allow popups for this site and retry.'; else if(msg.includes('NO_ACCOUNTS'))hint='No accounts found. Create an account in Nimiq Hub first.'; toast('Nimiq Hub connection failed. '+hint,'bad',5000); }
-  });
-  s.el.querySelector('#wNimiq')?.addEventListener('click', async (e) => {
-    const btn=e.currentTarget; if(env.kind==='desktop'){toast('Nimiq Pay is mobile-only. On desktop, use Nimiq Hub.','',4200);return;} if(!env.inNimiqPay){toast('Open PROOF inside Nimiq Pay to connect it. Browser users can use Nimiq Hub or demo wallet.','',5000);return;}
-    btn.disabled=true;btn.classList.add('is-loading');btn.innerHTML=`${ico.bolt} Connecting to Nimiq Pay…`;
-    try{await WalletService.connectNimiqPay();await refreshMe();s.close();toast('Nimiq Pay connected ✅ On-chain rewards enabled!','ok');location.hash='#/';}
-    catch(err){btn.disabled=false;btn.classList.remove('is-loading');btn.innerHTML=`${ico.bolt} Connect Nimiq Pay`;const msg=String(err.message||err);let hint='';if(msg.includes('NIMIQ_SDK_UNAVAILABLE'))hint='The wallet SDK could not load. Reopen PROOF from Nimiq Pay.';else if(msg.includes('NIMIQ_PAY_UNAVAILABLE'))hint='Nimiq Pay host not detected. Open PROOF inside Nimiq Pay.';else if(msg.includes('NO_ACCOUNTS'))hint='Create an account in Nimiq Pay first, then retry.';else if(msg.includes('TIMEOUT')||msg.includes('timeout'))hint='The wallet did not respond. Reopen PROOF and try again.';toast('Nimiq Pay connection failed. '+hint,'bad',4500);}
-  });
-  s.el.querySelector('#wDemo').addEventListener('click', async (e) => {
-    const btn=e.currentTarget;btn.disabled=true;btn.classList.add('is-loading');btn.textContent='Creating demo wallet…';
-    try{await WalletService.connectDemo();await refreshMe();s.close();toast('Demo wallet ready! Full experience with simulated rewards.','ok',3500);location.hash='#/';}
-    catch(err){btn.disabled=false;btn.classList.remove('is-loading');btn.innerHTML=`${ico.flask} Explore with demo wallet`;const errorMsg=err?.message?.includes('BAD_NONCE')?'Sign-in request expired. Please try again.':err?.message||'Could not create demo wallet. Please try again.';toast(errorMsg,'bad',4000);}
-  });
+export async function walletEntry(root){
+  const{sheet}=await import('../ui.js');const{environment,WalletService}=await import('../wallet.js');const env=environment();
+  const payBtn=`<button class="btn ${env.kind==='nimiqpay'?'btn-primary':'btn-ghost'} btn-block" id="wNimiq">${ico.wallet} Connect Nimiq Pay</button>`;const hubBtn=`<button class="btn btn-primary btn-block" id="wHub">${ico.link} Connect Nimiq Hub</button>`;const demoBtn=`<button class="btn ${env.kind==='nimiqpay'?'btn-soft':'btn-nim'} btn-block" id="wDemo">${ico.flask} Explore with demo wallet</button>`;let options,note;
+  if(env.kind==='nimiqpay'){options=payBtn+demoBtn;note='Running inside Nimiq Pay — your keys never leave the wallet. Rewards can be on-chain.';}else if(env.kind==='desktop'){options=hubBtn+demoBtn+`<button class="btn btn-ghost btn-block" id="wNimiq" style="opacity:.75">${ico.bolt} Nimiq Pay <span class="tiny">· mobile app only</span></button>`;note='Desktop detected → use Nimiq Hub for on-chain rewards, or explore instantly with the demo wallet.';}else{options=hubBtn+demoBtn+payBtn;note='Use Nimiq Hub in this browser, or open PROOF inside Nimiq Pay for native wallet access.';}
+  const s=sheet(`<h2 class="h1">Connect your wallet</h2><p class="sub mt8">Your wallet holds your NIM rewards. Keys never leave it — you approve every action.</p><div class="wallet-options mt16">${options}</div><p class="tiny center mt8 wallet-note">${note}</p>`);
+  s.el.querySelector('#wHub')?.addEventListener('click',async e=>{const btn=e.currentTarget;btn.disabled=true;btn.classList.add('is-loading');btn.innerHTML=`${ico.link} Connecting to Nimiq Hub…`;try{await WalletService.connectNimiqHub();await refreshMe();s.close();toast('Nimiq Hub connected ✅ On-chain rewards enabled!','ok');location.hash='#/';}catch(err){btn.disabled=false;btn.classList.remove('is-loading');btn.innerHTML=`${ico.link} Connect Nimiq Hub`;toast('Nimiq Hub connection failed. Please retry.','bad',5000);}});
+  s.el.querySelector('#wNimiq')?.addEventListener('click',async e=>{const btn=e.currentTarget;if(env.kind==='desktop'){toast('Nimiq Pay is mobile-only. On desktop, use Nimiq Hub.','',4200);return;}if(!env.inNimiqPay){toast('Open PROOF inside Nimiq Pay to connect it. Browser users can use Nimiq Hub or demo wallet.','',5000);return;}btn.disabled=true;btn.classList.add('is-loading');btn.innerHTML=`${ico.bolt} Connecting to Nimiq Pay…`;try{await WalletService.connectNimiqPay();await refreshMe();s.close();toast('Nimiq Pay connected ✅ On-chain rewards enabled!','ok');location.hash='#/';}catch(err){btn.disabled=false;btn.classList.remove('is-loading');btn.innerHTML=`${ico.bolt} Connect Nimiq Pay`;toast('Nimiq Pay connection failed. Please retry.','bad',4500);}});
+  s.el.querySelector('#wDemo').addEventListener('click',async e=>{const btn=e.currentTarget;btn.disabled=true;btn.classList.add('is-loading');btn.textContent='Creating demo wallet…';try{await WalletService.connectDemo();await refreshMe();s.close();toast('Demo wallet ready! Full experience with simulated rewards.','ok',3500);location.hash='#/';}catch(err){btn.disabled=false;btn.classList.remove('is-loading');btn.innerHTML=`${ico.flask} Explore with demo wallet`;toast(err?.message||'Could not create demo wallet. Please try again.','bad',4000);}});
 }
