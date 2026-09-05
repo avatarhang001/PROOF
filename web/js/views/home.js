@@ -27,92 +27,33 @@ export async function screen(root) {
   <main class="reference-home">
     <header class="reference-topbar">
       <a class="brand-lockup" href="#/" aria-label="PROOF home"><img src="/assets/proof-logo.svg" alt="PROOF" class="brand-logo"/></a>
-      <div class="reference-search"><span class="search-icon">${ico.search}</span><input placeholder="Search skills, proofs, users, or paths…" aria-label="Search"/><span class="search-shortcut">Ctrl K</span></div>
+      <div class="reference-search"><span class="search-icon">⌕</span><input placeholder="Search skills, proofs, users, or paths…" aria-label="Search"/><span class="search-shortcut">Ctrl K</span></div>
       <div class="reference-top-actions">
         <a href="#/notifications" class="reference-icon-btn" aria-label="Notifications">${ico.bell}${app.unread ? `<span class="reference-notification-badge">${app.unread}</span>` : ''}</a>
         <button class="btn reference-wallet" id="referenceWallet">${ico.wallet}<span>Connect wallet</span></button>
         <a href="#/profile" class="reference-profile" aria-label="Open profile"><span class="reference-avatar">${u.avatar || '👤'}</span><span class="reference-caret">⌄</span></a>
       </div>
     </header>
-
-    <section class="reference-hero">
-      <div class="reference-hero-copy">
-        <h1>${hello()} ${first}! 👋</h1>
-        <p>Keep going. Your next proof is closer than you think.</p>
-        <div class="reference-stat-row">
-          <div class="reference-stat"><span class="reference-stat-icon">🔥</span><div><strong>${streak}</strong><span>Day streak</span></div></div>
-          <div class="reference-stat"><span class="reference-stat-icon">⭐</span><div><strong>${xp.toLocaleString()}</strong><span>XP earned</span></div></div>
-          <div class="reference-stat"><span class="reference-stat-icon">✓</span><div><strong>${verified}</strong><span>Verified skills</span></div></div>
-          <div class="reference-stat"><span class="reference-stat-icon">🪙</span><div><strong>${nim}</strong><span>NIM earned</span></div></div>
-        </div>
-      </div>
-    </section>
-
-    <div class="reference-grid">
-      ${continuePanel(cont, percent)}
-      ${proofPanel(daily)}
-      ${skillsPanel(skills)}
-      ${achievementsPanel(d, daily)}
-      ${recommendationsPanel(d)}
-      ${progressPanel(percent, level, xp)}
-    </div>
+    <section class="reference-hero"><div class="reference-hero-copy"><h1>${hello()} ${first}! 👋</h1><p>Keep going. Your next proof is closer than you think.</p><div class="reference-stat-row"><div class="reference-stat"><span class="reference-stat-icon">🔥</span><div><strong>${streak}</strong><span>Day streak</span></div></div><div class="reference-stat"><span class="reference-stat-icon">⭐</span><div><strong>${xp.toLocaleString()}</strong><span>XP earned</span></div></div><div class="reference-stat"><span class="reference-stat-icon">✓</span><div><strong>${verified}</strong><span>Verified skills</span></div></div><div class="reference-stat"><span class="reference-stat-icon">🪙</span><div><strong>${nim}</strong><span>NIM earned</span></div></div></div></div></section>
+    <div class="reference-grid">${continuePanel(cont, percent)}${proofPanel(daily)}${skillsPanel(skills)}${achievementsPanel(d, daily)}${recommendationsPanel(d)}${progressPanel(percent, level, xp)}</div>
   </main>`;
 
   $('#referenceWallet', root)?.addEventListener('click', () => walletEntry(root));
   root.querySelector('#continuePath')?.addEventListener('click', () => { if (cont) location.hash = `#/learn/path/${cont.id}`; else location.hash = '#/learn'; });
   root.querySelector('#todayProof')?.addEventListener('click', () => { if (!daily.done) location.hash = '#/daily'; });
-  root.querySelector('#startRecommended')?.addEventListener('click', () => {
-    const value = root.querySelector('#referenceGoal')?.value?.trim();
-    if (value && value.length >= 3) generateAndOpenPath({ goal:value, anchor:document.getElementById('app') }).catch(e => toast(esc(e.message),'bad'));
-    else location.hash = '#/learn';
-  });
-  root.querySelectorAll('[data-skill]').forEach(n => n.addEventListener('click', () => {
-    generateAndOpenPath({ goal:`I want to learn ${n.dataset.skill}`, anchor:document.getElementById('app') }).catch(e => toast(esc(e.message),'bad'));
-  }));
+  root.querySelectorAll('[data-skill]').forEach(n => n.addEventListener('click', () => generateAndOpenPath({ goal:`I want to learn ${n.dataset.skill}`, anchor:document.getElementById('app') }).catch(e => toast(esc(e.message),'bad'))));
 }
 
 function hello(){ const h=new Date().getHours(); return h<12?'Good morning':h<18?'Good afternoon':'Good evening'; }
-
 function continuePanel(p, percent){
   if(!p) return `<section class="reference-card" id="continuePath"><div class="reference-card-head"><h2 class="reference-card-title">Continue learning</h2><a class="reference-view" href="#/learn">View paths</a></div><div class="reference-course"><div style="width:116px;height:78px;border-radius:10px;background:linear-gradient(135deg,#11184c,#4f3dd1);display:grid;place-items:center;color:#fff;font-size:26px">✦</div><div><h3>Start your first skill path</h3><p>AI builds a practical path around your goal.</p><div class="reference-progress"><i style="width:0"></i></div></div></div></section>`;
   const next=p.days?.flatMap?.(d=>d.items||[]).find(i=>!i.lessonDone&&!i.practiceDone&&!i.attempt);
   return `<section class="reference-card" id="continuePath"><div class="reference-card-head"><h2 class="reference-card-title">Continue learning</h2><a class="reference-view" href="#/learn/path/${p.id}">View path</a></div><div class="reference-course"><img src="/assets/proof-course-code.svg" alt=""/><div><h3>${esc(p.title || p.skillName || 'Your skill path')}</h3><p>${esc(next?.title || 'Keep building your proof')}</p><div class="reference-progress"><i style="width:${percent}%"></i></div><div style="font-size:9px;color:var(--ref-muted);margin-top:4px;text-align:right">${percent}%</div></div></div><div class="reference-course-foot"><span>◷ <b>${next ? '18 min' : 'Start'}</b><br/>left</span><span>▤ <b>${p.days?.length || 0}</b><br/>lessons</span><span>★ <b>4.7</b><br/>rating</span></div></section>`;
 }
+function proofPanel(d){return `<section class="reference-card reference-proof" id="todayProof"><div class="reference-card-head"><h2 class="reference-card-title">Today's proof</h2><a class="reference-view" href="#/prove">View all</a></div><div><span class="proof-tag">● Frontend Challenge</span><span class="popular">Popular</span></div><h3>${esc(d.title || 'Build a practical proof')}</h3><p>◷ ~20 min</p><span class="nim-reward">+${d.rewardNim || 1} NIM</span><button class="start-proof">${d.done ? 'Proof completed ✓' : 'Start proof  →'}</button><span class="proof-mini-art" aria-hidden="true"></span></div></section>`;}
+function skillsPanel(skills){const fallback=[['HTML','82%','Proficient','html-logo','▣'],['CSS','68%','Intermediate','css-logo','▣'],['JavaScript','45%','Learning','js-logo','JS'],['React','25%','Learning','react-logo','⚛']];const rows=skills.length?skills.slice(0,4).map(s=>[s.skillSlug?.replace(/-/g,' ')||'Skill',`${s.score||0}%`,s.verified?'Verified':'Building','', '✓']):fallback;return `<section class="reference-card"><div class="reference-card-head"><h2 class="reference-card-title">Skills you're building</h2><a class="reference-view" href="#/profile">View all</a></div><div class="reference-skills">${rows.map(r=>`<div class="reference-skill"><div class="skill-logo ${r[3]||'html-logo'}">${r[4]}</div><b>${esc(r[0])}</b><small>${esc(r[1])}</small><em>${esc(r[2])}</em></div>`).join('')}</div></section>`;}
+function achievementsPanel(d,daily){const items=[];if(daily?.done)items.push(['🏆','Proof passed',daily.passed?'Daily proof passed':'Proof attempted',`+${daily.rewardNim||1} NIM`]);const skill=d.mySkills?.find(s=>s.verified);if(skill)items.push(['🛡','Skill verified',skill.skillSlug?.replace(/-/g,' '),'+500 XP']);items.push(['🔥','Streak milestone',`${d.user?.streak?.current||0} day learning streak`,'+250 XP']);return `<section class="reference-card"><div class="reference-card-head"><h2 class="reference-card-title">Recent achievements</h2><a class="reference-view" href="#/profile">View all</a></div>${items.slice(0,3).map(x=>`<div class="reference-achievement"><span class="achievement-icon">${x[0]}</span><div><b>${esc(x[1])}</b><span>${esc(x[2])}</span></div><span class="award">${esc(x[3])}</span></div>`).join('')}</section>`;}
+function recommendationsPanel(d){const rec=(d.recommendedTasks||[]).slice(0,3);if(rec.length)return `<section class="reference-card"><div class="reference-card-head"><h2 class="reference-card-title">Recommended for you</h2><a class="reference-view" href="#/work">View all</a></div><div class="reference-recommendations">${rec.map((t,i)=>`<div class="reference-rec" data-skill="${esc(t.minProof?.skillSlug||t.title)}"><div class="rec-icon">${['JS','⚛','🎨'][i]||'✦'}</div><strong>${esc(t.title)}</strong><span>${fmtNim(t.budgetNim||0)} NIM task</span></div>`).join('')}</div></section>`;const trending=(d.trending||[]).slice(0,3);return `<section class="reference-card"><div class="reference-card-head"><h2 class="reference-card-title">Recommended for you</h2><a class="reference-view" href="#/learn">View all</a></div><div class="reference-recommendations">${trending.map((t,i)=>`<button class="reference-rec" data-skill="${esc(t.name||t.slug)}"><div class="rec-icon">${t.emoji||['JS','⚛','🎨'][i]}</div><strong>${esc(t.name||t.slug||'Skill')}</strong><span>${t.learners||0} learners</span></button>`).join('')}</div></section>`;}
+function progressPanel(percent,level,xp){return `<section class="reference-card reference-progress-card"><div class="progress-ring" style="background:conic-gradient(var(--ref-purple) 0 ${percent}%,#e8e8f2 ${percent}% 100%)"><b>${percent}%</b></div><div class="reference-xp"><b>Your progress</b><span>Level ${level} · ${xp.toLocaleString()} XP</span><div class="xpbar"><i style="width:${Math.max(8,Math.min(100,percent))}%"></i></div></div></section>`;}
 
-function proofPanel(d){
-  return `<section class="reference-card reference-proof" id="todayProof"><div class="reference-card-head"><h2 class="reference-card-title">Today's proof</h2><a class="reference-view" href="#/prove">View all</a></div><div><span class="proof-tag">● Frontend Challenge</span><span class="popular">Popular</span></div><h3>${esc(d.title || 'Build a practical proof')}</h3><p>◷ ~20 min</p><span class="nim-reward">+${d.rewardNim || 1} NIM</span><button class="start-proof">${d.done ? 'Proof completed ✓' : 'Start proof  →'}</button><span class="proof-mini-art" aria-hidden="true"></span></div></section>`;
-}
-
-function skillsPanel(skills){
-  const fallback=[['HTML','82%','Proficient','html-logo','▣'],['CSS','68%','Intermediate','css-logo','▣'],['JavaScript','45%','Learning','js-logo','JS'],['React','25%','Learning','react-logo','⚛']];
-  const rows=skills.length?skills.slice(0,4).map(s=>[s.skillSlug?.replace(/-/g,' ')||'Skill',`${s.score||0}%`,s.verified?'Verified':'Building','', '✓']):fallback;
-  return `<section class="reference-card"><div class="reference-card-head"><h2 class="reference-card-title">Skills you're building</h2><a class="reference-view" href="#/profile">View all</a></div><div class="reference-skills">${rows.map(r=>`<div class="reference-skill"><div class="skill-logo ${r[3]||'html-logo'}">${r[4]}</div><b>${esc(r[0])}</b><small>${esc(r[1])}</small><em>${esc(r[2])}</em></div>`).join('')}</div></section>`;
-}
-
-function achievementsPanel(d,daily){
-  const items=[];
-  if(daily?.done) items.push(['🏆','Proof passed',daily.passed?'Daily proof passed':'Proof attempted',`+${daily.rewardNim||1} NIM`]);
-  const skill=d.mySkills?.find(s=>s.verified); if(skill) items.push(['🛡','Skill verified',skill.skillSlug?.replace(/-/g,' '),'+500 XP']);
-  items.push(['🔥','Streak milestone',`${d.user?.streak?.current||0} day learning streak`,'+250 XP']);
-  return `<section class="reference-card"><div class="reference-card-head"><h2 class="reference-card-title">Recent achievements</h2><a class="reference-view" href="#/profile">View all</a></div>${items.slice(0,3).map(x=>`<div class="reference-achievement"><span class="achievement-icon">${x[0]}</span><div><b>${esc(x[1])}</b><span>${esc(x[2])}</span></div><span class="award">${esc(x[3])}</span></div>`).join('')}</section>`;
-}
-
-function recommendationsPanel(d){
-  const rec=(d.recommendedTasks||[]).slice(0,3);
-  if(rec.length) return `<section class="reference-card"><div class="reference-card-head"><h2 class="reference-card-title">Recommended for you</h2><a class="reference-view" href="#/work">View all</a></div><div class="reference-recommendations">${rec.map((t,i)=>`<div class="reference-rec" data-skill="${esc(t.minProof?.skillSlug||t.title)}"><div class="rec-icon">${['JS','⚛','🎨'][i]||'✦'}</div><strong>${esc(t.title)}</strong><span>${fmtNim(t.budgetNim||0)} NIM task</span></div>`).join('')}</div></section>`;
-  const trending=(d.trending||[]).slice(0,3);
-  return `<section class="reference-card"><div class="reference-card-head"><h2 class="reference-card-title">Recommended for you</h2><a class="reference-view" href="#/learn">View all</a></div><div class="reference-recommendations">${trending.map((t,i)=>`<button class="reference-rec" data-skill="${esc(t.name||t.slug)}"><div class="rec-icon">${t.emoji||['JS','⚛','🎨'][i]}</div><strong>${esc(t.name||t.slug||'Skill')}</strong><span>${t.learners||0} learners</span></button>`).join('')}</div></section>`;
-}
-
-function progressPanel(percent,level,xp){
-  return `<section class="reference-card reference-progress-card"><div class="progress-ring"><b>${percent}%</b></div><div class="reference-xp"><b>Your progress</b><span>Level ${level} · ${xp.toLocaleString()} XP</span><div class="xpbar"><i style="width:${Math.max(8,Math.min(100,percent))}%"></i></div></div></section>`;
-}
-
-export async function openTask(taskId) {
-  const { sheet } = await import('../ui.js');
-  let d; try { d=(await api.get(`/api/market/tasks/${taskId}`)).task; } catch(e){ return toast(esc(e.message),'bad'); }
-  const q=d.qualification;
-  const s=sheet(`<div class="row-between"><span class="chip chip-nim">${ico.coin} ${fmtNim(d.budgetNim)} NIM</span><span class="tiny">${timeAgo(d.postedAt)} · ${d.applications} applicants</span></div><h2 class="h1 mt8">${esc(d.title)}</h2><p class="sub mt8">${esc(d.description)}</p>${d.tags?.length?`<div class="chip-row mt8">${d.tags.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>`:''}${d.minProof?`<div class="card mt16" style="box-shadow:none;background:var(--surface-2)"><div class="row-between"><span class="tiny">REQUIREMENT</span><b style="font-size:13px">${esc(d.minProof.skillSlug.replace(/-/g,' '))} ${d.minProof.min}+</b></div><div class="qmeter mt8"><i style="width:${Math.min(100,q.yourScore)}%"></i><em style="left:${d.minProof.min}%"></em></div><div class="row-between mt8"><span class="tiny">your proof: <b>${q.yourScore}%</b></span><span class="chip ${q.qualified?'chip-ok':'chip-bad'}">${q.qualified?'✓ qualified':esc(q.reason)}</span></div></div>`:'<div class="card mt16" style="box-shadow:none;background:var(--surface-2)"><span class="tiny">Open to all proofers</span></div>'}${d.myApplication?`<div class="card mt12" style="box-shadow:none;background:var(--primary-soft)"><b style="font-size:14px">Application ${esc(d.myApplication.status)}</b>${d.myApplication.status==='accepted'?`<p class="sub mt8">Accepted! Deliver the work, then mark it complete to receive ${fmtNim(d.budgetNim)} NIM.</p><button class="btn btn-ok btn-block mt8" id="btnComplete">${ico.check} Mark delivered & get paid</button>`:'<p class="sub mt8">Waiting for the client.</p>'}</div>`:`<div class="field mt16"><label class="label">Your pitch (1–2 sentences)</label><textarea id="pitch" class="input" maxlength="400" placeholder="I've verified this skill and built similar work — here's my plan…"></textarea></div><button class="btn btn-primary btn-block" id="btnApply" ${q.qualified?'':'disabled'}>${q.qualified?`Apply for this task · ${fmtNim(d.budgetNim)} NIM`:'Prove the skill to unlock'}</button>`}`);
-  s.el.querySelector('#btnApply')?.addEventListener('click',async()=>{try{await api.post(`/api/market/tasks/${d.id}/apply`,{pitch:s.el.querySelector('#pitch').value});s.close();toast('Applied — check Work → My gigs.','ok',3400);setTimeout(()=>location.reload(),900);}catch(e){toast(esc(e.message),'bad');}});
-  s.el.querySelector('#btnComplete')?.addEventListener('click',async()=>{try{const r=await api.post(`/api/market/tasks/${d.id}/complete`);s.close();toast(`Task complete — ${(r.netLuna/100000).toFixed(2)} NIM added 💰`,'nim',3600);await refreshMe();setTimeout(()=>location.reload(),900);}catch(e){toast(esc(e.message),'bad');}});
-}
+export async function openTask(taskId){const{sheet}=await import('../ui.js');let d;try{d=(await api.get(`/api/market/tasks/${taskId}`)).task;}catch(e){return toast(esc(e.message),'bad');}const q=d.qualification;const s=sheet(`<div class="row-between"><span class="chip chip-nim">${ico.coin} ${fmtNim(d.budgetNim)} NIM</span><span class="tiny">${timeAgo(d.postedAt)} · ${d.applications} applicants</span></div><h2 class="h1 mt8">${esc(d.title)}</h2><p class="sub mt8">${esc(d.description)}</p>${d.tags?.length?`<div class="chip-row mt8">${d.tags.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>`:''}${d.minProof?`<div class="card mt16" style="box-shadow:none;background:var(--surface-2)"><div class="row-between"><span class="tiny">REQUIREMENT</span><b style="font-size:13px">${esc(d.minProof.skillSlug.replace(/-/g,' '))} ${d.minProof.min}+</b></div><div class="qmeter mt8"><i style="width:${Math.min(100,q.yourScore)}%"></i><em style="left:${d.minProof.min}%"></em></div><div class="row-between mt8"><span class="tiny">your proof: <b>${q.yourScore}%</b></span><span class="chip ${q.qualified?'chip-ok':'chip-bad'}">${q.qualified?'✓ qualified':esc(q.reason)}</span></div></div>`:'<div class="card mt16" style="box-shadow:none;background:var(--surface-2)"><span class="tiny">Open to all proofers</span></div>'}${d.myApplication?`<div class="card mt12" style="box-shadow:none;background:var(--primary-soft)"><b style="font-size:14px">Application ${esc(d.myApplication.status)}</b>${d.myApplication.status==='accepted'?`<p class="sub mt8">Accepted! Deliver the work, then mark it complete to receive ${fmtNim(d.budgetNim)} NIM.</p><button class="btn btn-ok btn-block mt8" id="btnComplete">${ico.check} Mark delivered & get paid</button>`:'<p class="sub mt8">Waiting for the client.</p>'}</div>`:`<div class="field mt16"><label class="label">Your pitch (1–2 sentences)</label><textarea id="pitch" class="input" maxlength="400" placeholder="I've verified this skill and built similar work — here's my plan…"></textarea></div><button class="btn btn-primary btn-block" id="btnApply" ${q.qualified?'':'disabled'}>${q.qualified?`Apply for this task · ${fmtNim(d.budgetNim)} NIM`:'Prove the skill to unlock'}</button>`}`);s.el.querySelector('#btnApply')?.addEventListener('click',async()=>{try{await api.post(`/api/market/tasks/${d.id}/apply`,{pitch:s.el.querySelector('#pitch').value});s.close();toast('Applied — check Work → My gigs.','ok',3400);setTimeout(()=>location.reload(),900);}catch(e){toast(esc(e.message),'bad');}});s.el.querySelector('#btnComplete')?.addEventListener('click',async()=>{try{const r=await api.post(`/api/market/tasks/${d.id}/complete`);s.close();toast(`Task complete — ${(r.netLuna/100000).toFixed(2)} NIM added 💰`,'nim',3600);await refreshMe();setTimeout(()=>location.reload(),900);}catch(e){toast(esc(e.message),'bad');}});}
