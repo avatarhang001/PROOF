@@ -1,0 +1,1265 @@
+/* ══════════════════════════════════════════════════════════════════
+   PROOF — UX Enhancements (September 2026)
+   Competition readiness improvements: accessibility, visual hierarchy,
+   and interaction polish
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────────────────────────────
+   P0: ACCESSIBILITY FIXES - Color Contrast & ARIA
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Improved contrast for muted text */
+:root {
+  --muted: rgba(3, 2, 2, .68);  /* WCAG AA compliant for small text */
+  --faint: rgba(3, 2, 2, .52);  /* Still lighter but meets contrast for UI elements */
+}
+
+/* Dark mode overrides to maintain contrast */
+html[data-theme="dark"] {
+  --muted: rgba(251, 248, 237, .7);
+  --faint: rgba(251, 248, 237, .5);
+}
+
+/* Skip to content link for keyboard users */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 8px;
+  z-index: 10000;
+  padding: 12px 20px;
+  background: var(--primary);
+  color: white;
+  border-radius: var(--r-sm);
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  transition: top .3s;
+}
+
+.skip-link:focus {
+  top: 8px;
+  outline: 3px solid rgba(35, 173, 153, .68);
+  outline-offset: 4px;
+}
+
+/* Screen reader only class for hidden but announced content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Loading state announcement for buttons */
+button[disabled][aria-busy="true"]::after {
+  content: "Loading";
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Enhanced focus states for better keyboard navigation */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: 3px solid rgba(35, 173, 153, .68);
+  outline-offset: 3px;
+  border-radius: inherit;
+}
+
+/* Tab navigation keyboard support indicators */
+[role="tablist"] [role="tab"][aria-selected="true"] {
+  position: relative;
+}
+
+[role="tablist"] [role="tab"][aria-selected="true"]::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 2px 2px 0 0;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   P0: KEYBOARD NAVIGATION ENHANCEMENTS
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Keyboard shortcut indicators */
+[data-shortcut]::after {
+  content: attr(data-shortcut);
+  margin-left: auto;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface-2);
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity .2s;
+}
+
+[data-shortcut]:hover::after,
+[data-shortcut]:focus-visible::after {
+  opacity: 1;
+}
+
+/* Modal focus trap styling */
+[role="dialog"][aria-modal="true"] {
+  isolation: isolate;
+}
+
+[role="dialog"][aria-modal="true"]:focus {
+  outline: none;
+}
+
+/* Backdrop click target for modals */
+.modal-backdrop {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.modal-content {
+  cursor: default;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   P1: PROOF RUNNER SIGNATURE EXPERIENCE ENHANCEMENTS
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Enhanced timer with color progression */
+.challenge-timer {
+  position: relative;
+  transition: color .3s, transform .1s;
+}
+
+.challenge-timer[data-urgency="critical"] {
+  color: var(--bad);
+  animation: timer-pulse 1s infinite;
+}
+
+.challenge-timer[data-urgency="warning"] {
+  color: var(--warn);
+}
+
+.challenge-timer[data-urgency="normal"] {
+  color: var(--ink);
+}
+
+@keyframes timer-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: .85; }
+}
+
+/* Enhanced requirements checklist with real-time validation */
+.requirements-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.requirements-list li {
+  position: relative;
+  padding: 12px 12px 12px 40px;
+  margin: 8px 0;
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  border-left: 3px solid var(--line);
+  transition: all .3s;
+}
+
+.requirements-list li::before {
+  content: '○';
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  font-size: 16px;
+  color: var(--muted);
+  transition: all .3s;
+}
+
+.requirements-list li[data-met="true"] {
+  background: var(--ok-soft);
+  border-left-color: var(--ok);
+}
+
+.requirements-list li[data-met="true"]::before {
+  content: '✓';
+  color: var(--ok);
+  font-weight: 700;
+}
+
+.requirements-list li[data-met="false"][data-touched="true"] {
+  background: var(--bad-soft);
+  border-left-color: var(--bad);
+}
+
+/* Enhanced proof submission confidence meter */
+.confidence-meter {
+  margin: 20px 0;
+  padding: 16px;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--r-md);
+  transition: all .3s;
+}
+
+.confidence-meter[data-level="high"] {
+  background: var(--ok-soft);
+  border-color: var(--ok);
+}
+
+.confidence-meter-bar {
+  height: 8px;
+  background: var(--line-2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.confidence-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--ok));
+  border-radius: 4px;
+  transition: width .5s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Enhanced analyzing state */
+.proof-analyzing {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.proof-analyzing-spinner {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 24px;
+  border: 4px solid var(--line-2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+.proof-analyzing-progress {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   P1: VERIFIED SKILLS PROMINENCE
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Enhanced verified badge */
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--ok);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(35, 173, 153, .25);
+}
+
+.verified-badge::before {
+  content: '✓';
+  font-size: 16px;
+  font-weight: 900;
+}
+
+/* Enhanced verified skill card */
+.skill-verified {
+  position: relative;
+  border: 2px solid #BDEBD4;
+  background: linear-gradient(to bottom, white, var(--ok-soft));
+  box-shadow: 0 4px 16px rgba(35, 173, 153, .12), 
+              0 1px 4px rgba(35, 173, 153, .08);
+}
+
+.skill-verified::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  height: 4px;
+  background: var(--grad-ok);
+  border-radius: var(--r-md) var(--r-md) 0 0;
+}
+
+.skill-verified-score {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--ok-deep);
+  line-height: 1;
+}
+
+/* Share button prominence */
+.share-proof-btn {
+  background: var(--ok);
+  color: white;
+  transition: all .3s;
+}
+
+.share-proof-btn:hover {
+  background: var(--ok-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(35, 173, 153, .3);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   P1: VISUAL HIERARCHY & SPACING NORMALIZATION
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Normalized spacing scale (4px base) */
+:root {
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+  --space-4xl: 64px;
+}
+
+/* Reduced nested card complexity */
+.card-nested {
+  background: transparent;
+  border: 1px solid var(--line);
+  box-shadow: none;
+  padding: var(--space-lg);
+}
+
+.card .card-nested:last-child {
+  margin-bottom: 0;
+}
+
+/* Unified visual density for secondary views */
+.view-socratic,
+.view-glossary,
+.view-reviews {
+  --spacing-rhythm: var(--space-lg);
+}
+
+.view-socratic .section,
+.view-glossary .section,
+.view-reviews .section {
+  margin-bottom: var(--space-xl);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   P1: INTERACTION IMPROVEMENTS
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Character count indicator for inputs */
+.input-wrapper {
+  position: relative;
+}
+
+.char-count {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  pointer-events: none;
+  transition: color .2s;
+}
+
+.char-count[data-exceeded="true"] {
+  color: var(--bad);
+  font-weight: 700;
+}
+
+/* Inline form validation */
+.input-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--bad);
+}
+
+.input-success {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--ok);
+}
+
+input[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: var(--bad);
+  box-shadow: 0 0 0 3px var(--bad-soft);
+}
+
+input[aria-invalid="false"],
+textarea[aria-invalid="false"] {
+  border-color: var(--ok);
+  box-shadow: 0 0 0 3px var(--ok-soft);
+}
+
+/* Loading states for all button types */
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  color: inherit;
+}
+
+.btn-primary.btn-loading::after { color: white; }
+.btn-ghost.btn-loading::after { color: var(--primary); }
+.btn-nim.btn-loading::after { color: white; }
+
+/* Scroll indicators for horizontal scrolling */
+.scroll-container {
+  position: relative;
+}
+
+.scroll-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity .3s;
+}
+
+.scroll-indicator-left {
+  left: 0;
+  background: linear-gradient(90deg, var(--bg), transparent);
+}
+
+.scroll-indicator-right {
+  right: 0;
+  background: linear-gradient(270deg, var(--bg), transparent);
+}
+
+.scroll-container[data-at-start="true"] .scroll-indicator-left,
+.scroll-container[data-at-end="true"] .scroll-indicator-right {
+  opacity: 0;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   P2: MARKETPLACE & WORK VIEW ENHANCEMENTS
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Enhanced qualification meter */
+.qualification-meter {
+  position: relative;
+  height: 8px;
+  background: var(--line-2);
+  border-radius: 4px;
+  overflow: visible;
+  margin: 12px 0;
+}
+
+.qualification-meter-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 4px;
+  transition: width .5s cubic-bezier(0.4, 0.0, 0.2, 1);
+  position: relative;
+}
+
+.qualification-meter-fill[data-qualified="true"] {
+  background: var(--ok);
+}
+
+.qualification-meter-fill::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: -4px;
+  width: 16px;
+  height: 16px;
+  background: inherit;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+
+.qualification-label {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Sponsored challenge premium indicator */
+.task-sponsored {
+  position: relative;
+  border: 2px solid var(--nim);
+  background: linear-gradient(to bottom, white, var(--nim-soft));
+}
+
+.task-sponsored::before {
+  content: '⭐ SPONSORED';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  background: var(--nim);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(233, 170, 25, .25);
+}
+
+/* Application status timeline */
+.application-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.status-step {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 8px 4px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  transition: all .3s;
+}
+
+.status-step[data-active="true"] {
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.status-step[data-complete="true"] {
+  background: var(--ok-soft);
+  color: var(--ok-deep);
+}
+
+.status-step::before {
+  content: attr(data-label);
+  display: block;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   P2: STEPPER PROGRESS INDICATOR
+   ──────────────────────────────────────────────────────────────────── */
+
+.stepper-progress {
+  position: relative;
+  height: 3px;
+  background: var(--line-2);
+  margin: 24px 0;
+  border-radius: 2px;
+  overflow: visible;
+}
+
+.stepper-progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 2px;
+  transition: width .5s cubic-bezier(0.4, 0.0, 0.2, 1);
+  position: relative;
+}
+
+.stepper-progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: -5.5px;
+  width: 14px;
+  height: 14px;
+  background: var(--primary);
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(35, 173, 153, .3);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   RESPONSIVE ADJUSTMENTS
+   ──────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 360px) {
+  /* Ensure readability on ultra-small screens */
+  .verified-badge {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+  
+  .skill-verified-score {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Tablet-specific optimizations */
+  .skill-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  /* Desktop hover enhancements */
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+  }
+  
+  /* Prevent nested card jitter */
+  .card .card:hover {
+    transform: none;
+  }
+  
+  /* Desktop marketplace side-by-side comparison */
+  .marketplace-compare {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xl);
+  }
+}
+
+/* Reduce motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .challenge-timer,
+  .confidence-meter-fill,
+  .qualification-meter-fill,
+  .stepper-progress-fill,
+  .card {
+    transition: none;
+  }
+  
+  .timer-pulse,
+  .spin {
+    animation: none;
+  }
+}
+
+/* Print styles for proof pages */
+@media print {
+  .skip-link,
+  .scroll-indicator,
+  .btn-loading::after,
+  nav {
+    display: none !important;
+  }
+  
+  .verified-badge,
+  .qualification-meter {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════
+   MOBILE & WEB RESPONSIVE ENHANCEMENTS
+   Added: September 8, 2026
+   Purpose: Comprehensive mobile/tablet/desktop responsiveness
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   FLUID TYPOGRAPHY
+   Seamless scaling across all viewports using CSS clamp()
+   ───────────────────────────────────────────────────────────────────── */
+
+:root {
+  --font-display-fluid: clamp(28px, 5vw, 36px);
+  --font-h1-fluid: clamp(20px, 4vw, 26px);
+  --font-h2-fluid: clamp(17px, 3vw, 20px);
+  --font-h3-fluid: clamp(15px, 2.5vw, 18px);
+  --font-body-fluid: clamp(14px, 2vw, 16px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   MOBILE TOUCH OPTIMIZATIONS (≤ 768px)
+   ───────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Ensure all buttons meet 44px minimum touch target (Apple HIG) */
+  .btn {
+    min-height: 44px;
+    padding: 12px 20px;
+  }
+  
+  .btn-sm {
+    min-height: 40px;
+    padding: 10px 16px;
+  }
+  
+  .btn-xs {
+    min-height: 36px;
+    padding: 8px 14px;
+  }
+  
+  /* Larger tap targets for icon buttons */
+  .btn-icon {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 12px;
+  }
+  
+  /* Skill cards should be easy to tap */
+  .skill-card,
+  .lesson-card {
+    min-height: 60px;
+    padding: 16px;
+    cursor: pointer;
+  }
+  
+  /* Marketplace items need larger tap targets */
+  .marketplace-item,
+  .task-card {
+    min-height: 72px;
+    padding: 16px;
+  }
+  
+  /* Challenge attempt cards */
+  .proof-attempt-card {
+    padding: 16px;
+    min-height: 80px;
+  }
+  
+  /* Mobile proof signature flow */
+  .proof-runner-signature {
+    padding: 20px 16px;
+  }
+  
+  .signature-preview {
+    font-size: 14px;
+    padding: 16px;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  
+  .signature-requirements {
+    gap: 12px;
+  }
+  
+  .requirement-item {
+    font-size: 14px;
+    padding: 12px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .confidence-meter {
+    margin: 20px 0;
+  }
+  
+  .confidence-slider {
+    height: 48px;
+    min-height: 48px;
+    cursor: pointer;
+  }
+  
+  /* Timer should be prominent but not overwhelming */
+  .proof-timer {
+    font-size: 18px;
+    padding: 10px 16px;
+  }
+  
+  /* Mobile marketplace */
+  .marketplace-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .marketplace-item {
+    width: 100%;
+  }
+  
+  /* Payment flow optimization */
+  .payment-modal {
+    padding: 24px 16px;
+  }
+  
+  .payment-summary {
+    font-size: 16px;
+    padding: 16px;
+  }
+  
+  .payment-amount {
+    font-size: 28px;
+    font-weight: 800;
+  }
+  
+  /* Mobile navigation items should be tappable */
+  .nav a {
+    min-height: 44px;
+    padding: 8px 0;
+  }
+  
+  /* Mobile form inputs */
+  input,
+  textarea,
+  select {
+    min-height: 44px;
+    padding: 12px 16px;
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+  
+  /* Mobile sheet/modal actions */
+  .sheet .btn,
+  .modal .btn {
+    min-height: 48px;
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   TABLET OPTIMIZATIONS (768px - 1023px)
+   Better use of medium-sized screens
+   ───────────────────────────────────────────────────────────────────── */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Two-column grid for skill cards */
+  .skill-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  /* Two-column lesson list */
+  .lesson-grid,
+  .lesson-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  /* Marketplace can show 2 items side by side */
+  .marketplace-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  /* Profile stats in horizontal layout */
+  .profile-stats {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: space-between;
+  }
+  
+  .stat-card {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  /* Leaderboard can show more info */
+  .leaderboard-item {
+    padding: 16px 20px;
+  }
+  
+  .leaderboard-rank {
+    font-size: 20px;
+  }
+  
+  /* Challenge cards side by side */
+  .challenge-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  /* Proof attempts in two columns */
+  .proof-attempts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  /* Dashboard stats grid */
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Tablet landscape specific */
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: landscape) {
+  /* Use full width in landscape */
+  #app {
+    max-width: 100%;
+  }
+  
+  /* Side-by-side proof review */
+  .proof-review-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  
+  /* Horizontal stats dashboard */
+  .dashboard-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  /* Marketplace can fit 3 items in landscape */
+  .marketplace-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   DESKTOP ENHANCEMENTS (≥ 1024px)
+   Rich interactions and optimal layouts
+   ───────────────────────────────────────────────────────────────────── */
+
+@media (min-width: 1024px) and (hover: hover) {
+  /* Rich card hover effects */
+  .skill-card:hover {
+    transform: translateY(-6px) translateZ(0);
+    box-shadow: 0 12px 32px rgba(35, 173, 153, .15);
+  }
+  
+  .lesson-card:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    transform: translateX(4px);
+  }
+  
+  /* Marketplace hover preview */
+  .marketplace-item:hover {
+    transform: scale(1.02) translateZ(0);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, .12);
+  }
+  
+  /* Button hover animations */
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Proof attempt hover */
+  .proof-attempt-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 8px 24px rgba(35, 173, 153, .12);
+  }
+  
+  /* Profile stats hover */
+  .stat-card:hover {
+    background: var(--surface-2);
+    border-color: var(--primary);
+    transform: translateY(-3px);
+  }
+  
+  /* Leaderboard item hover */
+  .leaderboard-item:hover {
+    background: var(--primary-soft);
+    border-left: 4px solid var(--primary);
+  }
+  
+  /* Challenge card hover */
+  .challenge-card:hover {
+    box-shadow: 0 12px 32px rgba(35, 173, 153, .18);
+    border-color: var(--primary);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   LARGE DESKTOP / ULTRA-WIDE (≥ 1440px)
+   Maximize screen real estate
+   ───────────────────────────────────────────────────────────────────── */
+
+@media (min-width: 1440px) {
+  #app {
+    max-width: 1400px;
+  }
+  
+  /* Three-column bento grid on ultra-wide */
+  .screen > .pad:not(.bento-read) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+  
+  /* Hero and full-width elements span all 3 columns */
+  .screen > .pad > .bento-full {
+    grid-column: 1 / -1;
+  }
+  
+  .screen > .pad > .card-hero {
+    grid-column: 1 / -1;
+  }
+  
+  .screen > .pad > .row-between {
+    grid-column: 1 / -1;
+  }
+  
+  /* Skill grid can show more columns */
+  .skill-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  /* Marketplace 3-column grid */
+  .marketplace-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Leaderboard can be wider */
+  .leaderboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  /* Challenge grid 3 columns */
+  .challenge-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Proof attempts 3 columns */
+  .proof-attempts-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   MEDIA RESPONSIVENESS
+   Images, avatars, icons scale appropriately
+   ───────────────────────────────────────────────────────────────────── */
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Avatar images */
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .avatar {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .avatar-large {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* Skill icons should scale */
+.skill-icon {
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .skill-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .skill-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 30px;
+  }
+}
+
+/* Badge images */
+.badge-icon {
+  width: 60px;
+  height: 60px;
+}
+
+@media (min-width: 768px) {
+  .badge-icon {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .badge-icon {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   PERFORMANCE & ACCESSIBILITY
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Reduced motion for accessibility and performance */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .card:hover,
+  .skill-card:hover,
+  .marketplace-item:hover {
+    transform: none;
+  }
+  
+  .btn:active,
+  .btn:hover {
+    transform: none;
+  }
+}
+
+/* Disable expensive animations on older mobile devices */
+@media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
+  /* Simplify screen transitions */
+  .screen {
+    animation: none;
+  }
+  
+  /* Simplify card interactions */
+  .card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+  }
+  
+  /* Disable parallax effects */
+  .parallax {
+    transform: none !important;
+  }
+  
+  /* Keep essential animations only */
+  .btn:active {
+    transform: scale(0.97);
+    transition: transform 0.1s;
+  }
+}
+
+/* GPU acceleration for smooth animations */
+.card,
+.btn,
+.skill-card,
+.marketplace-item,
+.proof-attempt-card,
+.lesson-card {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Remove will-change after animation completes */
+.card:not(:hover),
+.btn:not(:active),
+.skill-card:not(:hover) {
+  will-change: auto;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn {
+    border: 2px solid currentColor;
+  }
+  
+  .card {
+    border: 2px solid var(--line);
+  }
+  
+  .skill-verified-badge {
+    border: 2px solid var(--ok);
+  }
+}
+
+/* Dark mode adjustments for readability */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --shadow-strength: 0.3;
+  }
+  
+  .card {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, var(--shadow-strength));
+  }
+  
+  img {
+    opacity: 0.9;
+  }
+}
+
+/* Print styles */
+@media print {
+  .nav,
+  .btn,
+  .sheet,
+  .modal {
+    display: none !important;
+  }
+  
+  .card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   END MOBILE & WEB RESPONSIVE ENHANCEMENTS
+   ═════════════════════════════════════════════════════════════════════ */

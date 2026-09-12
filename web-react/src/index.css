@@ -1,0 +1,354 @@
+@import "tailwindcss";
+
+/* PROOF Design System - Brand Colors */
+@variant dark (&:where(.dark, .dark *));
+
+/* ================================================================
+   Design Tokens - PROOF Brand Identity
+   Cream + Navy + Teal + Gold
+   ================================================================ */
+:root {
+  /* Core Brand Colors - Light Mode */
+  --app: #FBF8ED;                    /* Cream background */
+  --surface: #FFFFFF;                /* Clean white surface */
+  --surface-2: #F4F4F4;             /* Light gray */
+  --card: #FFFFFF;
+  --elevated: #F9F9FA;
+  
+  /* Typography */
+  --ink: #030202;                    /* Brand dark black */
+  --ink-2: rgba(3, 2, 2, .8);
+  --ink-soft: rgba(3, 2, 2, .7);
+  --muted: rgba(3, 2, 2, .6);
+  --faint: rgba(3, 2, 2, .4);
+  
+  /* Borders & Lines */
+  --line: rgba(3, 2, 2, .12);
+  --line-strong: rgba(3, 2, 2, .2);
+  
+  /* Brand Primary - Teal */
+  --brand: #23AD99;                  /* Brand teal */
+  --brand-deep: #147568;             /* Accessible teal for gradients and text */
+  --brand-hover: #1B8A7A;           /* Darkened teal */
+  --brand-soft: rgba(35, 173, 153, .09);
+  --brand-ring: rgba(35, 173, 153, .25);
+  
+  /* NIM Economy - Gold */
+  --gold: #E9AA19;                   /* Brand golden yellow */
+  --gold-deep: #B88614;              /* Accessible gold for text */
+  --gold-soft: rgba(233, 170, 25, .13);
+  --nim-soft: rgba(233, 170, 25, .13);
+  
+  /* Status Colors */
+  --ok: #23AD99;                     /* Success - teal */
+  --ok-deep: #1B8A7A;
+  --ok-soft: rgba(35, 173, 153, .12);
+  --bad: #D94432;                    /* Error red */
+  --bad-soft: rgba(217, 68, 50, .1);
+  --warn: #E9AA19;                   /* Warning - gold */
+  --warn-soft: rgba(233, 170, 25, .11);
+  
+  /* Gradients */
+  --grad-hero: linear-gradient(150deg, #151853 0%, #1F2763 52%, #2D3A7A 118%);
+  --grad-brand: linear-gradient(135deg, #23AD99, #1B8A7A);
+  --grad-gold: linear-gradient(135deg, #E9AA19, #F0C43A);
+  
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgba(3, 2, 2, .05), 0 4px 14px rgba(3, 2, 2, .05);
+  --shadow-card-hover: 0 2px 6px rgba(3, 2, 2, .07), 0 16px 40px rgba(3, 2, 2, .12);
+  --shadow-hero: 0 24px 64px rgba(3, 2, 2, .28);
+  
+  /* Scrim */
+  --scrim: rgba(17, 15, 32, 0.42);
+}
+
+/* Dark Theme - Navy Background */
+.dark {
+  --app: #151853;                    /* Brand navy blue */
+  --surface: #1F2763;                /* Lighter navy */
+  --surface-2: #2A3276;              /* Even lighter navy */
+  --card: #1F2763;
+  --elevated: #243069;
+  
+  --ink: #FBF8ED;                    /* Cream for dark mode text */
+  --ink-2: rgba(251, 248, 237, .85);
+  --ink-soft: rgba(251, 248, 237, .72);
+  --muted: rgba(251, 248, 237, .62);
+  --faint: rgba(251, 248, 237, .42);
+  
+  --line: rgba(251, 248, 237, .12);
+  --line-strong: rgba(251, 248, 237, .2);
+  
+  --brand: #23AD99;                  /* Keep teal consistent */
+  --brand-deep: #147568;
+  --brand-hover: #2BC4B0;            /* Lighter teal for dark mode */
+  --brand-soft: rgba(35, 173, 153, .14);
+  --brand-ring: rgba(35, 173, 153, .30);
+  
+  --gold: #E9AA19;
+  --gold-deep: #F0C43A;              /* Lighter gold */
+  --gold-soft: rgba(233, 170, 25, .16);
+  --nim-soft: rgba(233, 170, 25, .16);
+  
+  --ok: #23AD99;
+  --ok-deep: #2BC4B0;
+  --ok-soft: rgba(35, 173, 153, .16);
+  --bad: #FF6B57;
+  --bad-soft: rgba(255, 107, 87, .14);
+  --warn: #E9AA19;
+  --warn-soft: rgba(233, 170, 25, .14);
+  
+  --grad-hero: linear-gradient(150deg, #151853 0%, #1F2763 52%, #2D3A7A 118%);
+  --grad-brand: linear-gradient(135deg, #23AD99, #2BC4B0);
+  --grad-gold: linear-gradient(135deg, #E9AA19, #F0C43A);
+  
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+  --shadow-card-hover: 0 2px 6px rgba(0, 0, 0, .35), 0 16px 40px rgba(0, 0, 0, .45);
+  --shadow-hero: 0 24px 64px rgba(0, 0, 0, .6);
+  
+  --scrim: rgba(4, 4, 10, 0.6);
+}
+
+/* Map to Tailwind Theme */
+@theme inline {
+  --color-app: var(--app);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-card: var(--card);
+  --color-elevated: var(--elevated);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-gold: var(--gold);
+  --color-gold-deep: var(--gold-deep);
+  --color-gold-soft: var(--gold-soft);
+  --color-ok: var(--ok);
+  --color-ok-deep: var(--ok-deep);
+  --color-ok-soft: var(--ok-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  
+  --font-sans: "Manrope", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-hero: var(--shadow-hero);
+  
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+
+/* ================================================================
+   Base Styles
+   ================================================================ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--app);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--brand) 24%, transparent);
+    color: var(--ink);
+  }
+
+  :where(a, button, input, [tabindex]):focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  input::placeholder {
+    color: var(--faint);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}
+
+/* ================================================================
+   Utilities
+   ================================================================ */
+@layer utilities {
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .anim-drift {
+    animation: drift 22s ease-in-out infinite alternate;
+  }
+
+  .anim-float {
+    animation: floaty 11s ease-in-out infinite;
+  }
+
+  .anim-float-slow {
+    animation: floaty 16s ease-in-out infinite reverse;
+  }
+
+  .anim-glow {
+    animation: glow 9s ease-in-out infinite alternate;
+  }
+
+  .anim-pulse-gentle {
+    animation: pulse-gentle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .grain {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+    background-size: 5px 5px;
+  }
+}
+
+/* ================================================================
+   Animations
+   ================================================================ */
+@keyframes drift {
+  from {
+    transform: translate3d(-1.5%, 0, 0);
+  }
+  to {
+    transform: translate3d(1.5%, -2%, 0);
+  }
+}
+
+@keyframes floaty {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translateY(-12px) rotate(var(--rot, 0deg));
+  }
+}
+
+@keyframes glow {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 0.95;
+  }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--brand-ring);
+  }
+  50% {
+    box-shadow: 0 0 0 8px var(--brand-ring);
+  }
+}
+
+@keyframes wave {
+  0%, 60%, 100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-8deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .anim-drift,
+  .anim-float,
+  .anim-float-slow,
+  .anim-glow,
+  .anim-pulse-gentle {
+    animation: none !important;
+  }
+}
+
+/* ================================================================
+   Scrollbar Styling
+   ================================================================ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--line-strong);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--faint);
+  background-clip: content-box;
+}
+
+/* ================================================================
+   Screen Reader Only
+   ================================================================ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}

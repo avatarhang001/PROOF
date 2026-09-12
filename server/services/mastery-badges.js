@@ -1,0 +1,331 @@
+/**
+ * Mastery Badges Service
+ * Tracks and awards achievement badges based on user progress and milestones.
+ */
+
+import { uid, now } from '../util.js';
+
+let _store = null;
+export const setStore = (s) => { _store = s; };
+const store = () => {
+  if (!_store) throw new Error('Store not initialized - call setStore() first');
+  return _store;
+};
+
+// Badge definitions with unlock criteria
+const BADGE_DEFINITIONS = {
+  // Learning milestones
+  first_lesson: { name: 'First Steps', emoji: '🎯', description: 'Complete your first lesson', category: 'learning' },
+  lesson_streak_3: { name: '3-Day Scholar', emoji: '📚', description: 'Maintain a 3-day learning streak', category: 'streaks' },
+  lesson_streak_7: { name: 'Week Warrior', emoji: '🔥', description: 'Maintain a 7-day learning streak', category: 'streaks' },
+  lesson_streak_30: { name: 'Month Master', emoji: '⭐', description: 'Maintain a 30-day learning streak', category: 'streaks' },
+  lesson_streak_100: { name: 'Century Club', emoji: '💯', description: 'Maintain a 100-day learning streak', category: 'streaks' },
+  
+  // Practice achievements
+  first_practice: { name: 'Hands On', emoji: '✋', description: 'Complete your first practice', category: 'practice' },
+  practice_10: { name: 'Practice Makes Progress', emoji: '💪', description: 'Complete 10 practices', category: 'practice' },
+  practice_50: { name: 'Dedicated', emoji: '🎖️', description: 'Complete 50 practices', category: 'practice' },
+  practice_100: { name: 'Centurion', emoji: '👑', description: 'Complete 100 practices', category: 'practice' },
+  
+  // Review mastery
+  first_review: { name: 'Review Rookie', emoji: '🔄', description: 'Complete your first review', category: 'reviews' },
+  review_streak_7: { name: 'Review Habit', emoji: '🌟', description: 'Review 7 days in a row', category: 'reviews' },
+  review_50: { name: 'Memory Master', emoji: '🧠', description: 'Complete 50 reviews', category: 'reviews' },
+  perfect_review_10: { name: 'Perfect Memory', emoji: '💎', description: 'Score perfect (5) on 10 reviews', category: 'reviews' },
+  
+  // Skill mastery
+  skill_master_1: { name: 'First Mastery', emoji: '🎓', description: 'Master your first skill', category: 'mastery' },
+  skill_master_5: { name: 'Expert', emoji: '🏆', description: 'Master 5 skills', category: 'mastery' },
+  skill_master_10: { name: 'Polymath', emoji: '🧙', description: 'Master 10 skills', category: 'mastery' },
+  
+  // Challenge achievements
+  first_challenge: { name: 'Challenger', emoji: '⚔️', description: 'Complete your first challenge', category: 'challenges' },
+  challenge_streak_3: { name: 'Challenge Hunter', emoji: '🎯', description: 'Complete 3 challenges in a row', category: 'challenges' },
+  
+  // Goals
+  first_goal: { name: 'Goal Setter', emoji: '🎯', description: 'Set your first learning goal', category: 'goals' },
+  goal_complete_10: { name: 'Goal Crusher', emoji: '💥', description: 'Complete 10 learning goals', category: 'goals' },
+  
+  // Special achievements
+  early_bird: { name: 'Early Bird', emoji: '🌅', description: 'Complete a lesson before 8 AM', category: 'special' },
+  night_owl: { name: 'Night Owl', emoji: '🦉', description: 'Complete a lesson after 10 PM', category: 'special' },
+  weekend_warrior: { name: 'Weekend Warrior', emoji: '⚡', description: 'Learn on both Saturday and Sunday', category: 'special' },
+};
+
+/**
+ * Get all badges for a user
+ */
+export async function getUserBadges(userId) {
+  const filtered = await store().filter('mastery_badges', (b) => b.userId === userId);
+  const badges = filtered.sort((a, b) => b.earnedAt - a.earnedAt);
+  
+  return badges.map(b => ({
+    ...b,
+    badgeId: b.badgeType, // stable alias — API consumers/tests use badgeId
+    definition: BADGE_DEFINITIONS[b.badgeType] || { name: b.badgeType, emoji: '🏅', description: '', category: 'other' }
+  }));
+}
+
+/**
+ * Get badge progress summary
+ */
+export async function getBadgeProgress(userId) {
+  const allBadges = await store().filter('mastery_badges', (b) => b.userId === userId);
+  const earned = allBadges.length;
+  const total = Object.keys(BADGE_DEFINITIONS).length;
+  
+  const byCategory = {};
+  const earnedBadges = await getUserBadges(userId);
+  
+  for (const badge of earnedBadges) {
+    const cat = badge.definition.category;
+    byCategory[cat] = (byCategory[cat] || 0) + 1;
+  }
+  
+  return {
+    earned,
+    total,
+    percentage: Math.round((earned / total) * 100),
+    byCategory,
+    recentBadges: earnedBadges.slice(0, 5)
+  };
+}
+
+/**
+ * Award a badge to a user
+ */
+export async function awardBadge(userId, badgeType) {
+  // Check if already earned
+  const existing = await store().find('mastery_badges', (b) => b.userId === userId && b.badgeType === badgeType);
+  if (existing) return null;
+  
+  const definition = BADGE_DEFINITIONS[badgeType];
+  if (!definition) return null;
+  
+  const badge = {
+    id: uid('badge'),
+    userId,
+    skillSlug: '', // Required by schema
+    topicSlug: null, // Optional
+    badgeType,
+    level: 'bronze', // Default level
+    masteryScore: 0, // Default score
+    criteria: definition.description || '',
+    earnedAt: now()
+  };
+  
+  await store().insert('mastery_badges', badge);
+  await store().save();
+
+  return {
+    ...badge,
+    badgeId: badgeType, // stable alias — API consumers/tests use badgeId
+    definition  };
+}
+
+/**
+ * Check and award badges based on user activity
+ * This is called after various user actions to see if they've unlocked new badges
+ */
+export async function checkAndAwardBadges(userId) {
+  const awarded = [];
+  
+  // Get user stats
+  const stats = await store().get('user_stats', userId);
+  if (!stats) return awarded;
+  
+  // Lesson milestones
+  if (stats.totalLessonsCompleted >= 1) {
+    const badge = await awardBadge(userId, 'first_lesson');
+    if (badge) awarded.push(badge);
+  }
+  
+  // Practice milestones
+  if (stats.totalPracticesCompleted >= 1) {
+    const badge = await awardBadge(userId, 'first_practice');
+    if (badge) awarded.push(badge);
+  }
+  if (stats.totalPracticesCompleted >= 10) {
+    const badge = await awardBadge(userId, 'practice_10');
+    if (badge) awarded.push(badge);
+  }
+  if (stats.totalPracticesCompleted >= 50) {
+    const badge = await awardBadge(userId, 'practice_50');
+    if (badge) awarded.push(badge);
+  }
+  if (stats.totalPracticesCompleted >= 100) {
+    const badge = await awardBadge(userId, 'practice_100');
+    if (badge) awarded.push(badge);
+  }
+  
+  // Review milestones
+  if (stats.totalReviewsDone >= 1) {
+    const badge = await awardBadge(userId, 'first_review');
+    if (badge) awarded.push(badge);
+  }
+  if (stats.totalReviewsDone >= 50) {
+    const badge = await awardBadge(userId, 'review_50');
+    if (badge) awarded.push(badge);
+  }
+  
+  // Streak badges
+  if (stats.currentStreak >= 3) {
+    const badge = await awardBadge(userId, 'lesson_streak_3');
+    if (badge) awarded.push(badge);
+  }
+  if (stats.currentStreak >= 7) {
+    const badge = await awardBadge(userId, 'lesson_streak_7');
+    if (badge) awarded.push(badge);
+  }
+  if (stats.currentStreak >= 30) {
+    const badge = await awardBadge(userId, 'lesson_streak_30');
+    if (badge) awarded.push(badge);
+  }
+  if (stats.currentStreak >= 100) {
+    const badge = await awardBadge(userId, 'lesson_streak_100');
+    if (badge) awarded.push(badge);
+  }
+  
+  // Perfect reviews
+  const perfectReviews = (await store().filter('review_schedule', (r) => r.userId === userId && r.lastQuality === 5)).length;
+  
+  if (perfectReviews >= 10) {
+    const badge = await awardBadge(userId, 'perfect_review_10');
+    if (badge) awarded.push(badge);
+  }
+  
+  // Skill mastery count
+  const masteredSkills = (await store().filter('user_mastery', (m) => m.userId === userId && m.masteryLevel >= 0.8)).length;
+  
+  if (masteredSkills >= 1) {
+    const badge = await awardBadge(userId, 'skill_master_1');
+    if (badge) awarded.push(badge);
+  }
+  if (masteredSkills >= 5) {
+    const badge = await awardBadge(userId, 'skill_master_5');
+    if (badge) awarded.push(badge);
+  }
+  if (masteredSkills >= 10) {
+    const badge = await awardBadge(userId, 'skill_master_10');
+    if (badge) awarded.push(badge);
+  }
+  
+  // Challenge achievements
+  const challenges = (await store().filter('submissions', (s) => s.userId === userId && s.score >= 70)).length;
+  if (challenges >= 1) {
+    const badge = await awardBadge(userId, 'first_challenge');
+    if (badge) awarded.push(badge);
+  }
+  
+  // Goals
+  const goals = (await store().filter('learning_goals', (g) => g.userId === userId)).length;
+  if (goals >= 1) {
+    const badge = await awardBadge(userId, 'first_goal');
+    if (badge) awarded.push(badge);
+  }
+  
+  const completedGoals = (await store().filter('learning_goals', (g) => g.userId === userId && g.completed === true)).length;
+  if (completedGoals >= 10) {
+    const badge = await awardBadge(userId, 'goal_complete_10');
+    if (badge) awarded.push(badge);
+  }
+  
+  return awarded;
+}
+
+/**
+ * Check time-based special badges
+ */
+export async function checkSpecialBadges(userId, timestamp = Date.now()) {
+  const awarded = [];
+  const date = new Date(timestamp);
+  const hour = date.getHours();
+  const day = date.getDay();
+  
+  // Early bird (before 8 AM)
+  if (hour < 8) {
+    const badge = await awardBadge(userId, 'early_bird');
+    if (badge) awarded.push(badge);
+  }
+  
+  // Night owl (after 10 PM)
+  if (hour >= 22) {
+    const badge = await awardBadge(userId, 'night_owl');
+    if (badge) awarded.push(badge);
+  }
+  
+  // Weekend warrior (check if they learned on both Sat and Sun)
+  if (day === 0 || day === 6) { // Saturday or Sunday
+    const thisWeekStart = new Date(date);
+    thisWeekStart.setDate(date.getDate() - date.getDay()); // Go to Sunday
+    thisWeekStart.setHours(0, 0, 0, 0);
+    
+    const sessions = await store().filter('learning_sessions', (s) => s.userId === userId && s.createdAt >= thisWeekStart.getTime());
+    
+    const hasSaturday = sessions.some(s => new Date(s.createdAt).getDay() === 6);
+    const hasSunday = sessions.some(s => new Date(s.createdAt).getDay() === 0);
+    
+    if (hasSaturday && hasSunday) {
+      const badge = await awardBadge(userId, 'weekend_warrior');
+      if (badge) awarded.push(badge);
+    }
+  }
+  
+  return awarded;
+}
+
+/**
+ * Get available badge definitions
+ */
+export function getBadgeDefinitions() {
+  return BADGE_DEFINITIONS;
+}
+
+/**
+ * Get next badges user can earn (closest to unlocking)
+ */
+export async function getNextBadges(userId, limit = 5) {
+  const stats = await store().get('user_stats', userId);
+  if (!stats) return [];
+  
+  const earned = (await getUserBadges(userId)).map((b) => b.badgeType);
+  const next = [];
+  
+  // Calculate progress towards unearned badges
+  const addIfNotEarned = (badgeType, progress, target) => {
+    if (!earned.includes(badgeType)) {
+      next.push({
+        ...BADGE_DEFINITIONS[badgeType],
+        badgeType,
+        badgeId: badgeType, // stable alias — API consumers/tests use badgeId
+        progress,
+        target,
+        percentage: Math.min(100, Math.round((progress / target) * 100))
+      });
+    }
+  };
+  
+  // Lesson milestones
+  addIfNotEarned('first_lesson', stats.totalLessonsCompleted || 0, 1);
+  
+  // Practice milestones
+  addIfNotEarned('first_practice', stats.totalPracticesCompleted || 0, 1);
+  addIfNotEarned('practice_10', stats.totalPracticesCompleted || 0, 10);
+  addIfNotEarned('practice_50', stats.totalPracticesCompleted || 0, 50);
+  addIfNotEarned('practice_100', stats.totalPracticesCompleted || 0, 100);
+  
+  // Review milestones
+  addIfNotEarned('first_review', stats.totalReviewsDone || 0, 1);
+  addIfNotEarned('review_50', stats.totalReviewsDone || 0, 50);
+  
+  // Streak badges
+  addIfNotEarned('lesson_streak_3', stats.currentStreak || 0, 3);
+  addIfNotEarned('lesson_streak_7', stats.currentStreak || 0, 7);
+  addIfNotEarned('lesson_streak_30', stats.currentStreak || 0, 30);
+  addIfNotEarned('lesson_streak_100', stats.currentStreak || 0, 100);
+  
+  // Sort by percentage (closest to unlock first)
+  next.sort((a, b) => b.percentage - a.percentage);
+  
+  return next.slice(0, limit);
+}

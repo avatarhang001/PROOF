@@ -1,0 +1,495 @@
+/* ==========================================================================
+   PROOF Reference Home Page - Exact Match to Screenshot
+   ========================================================================== */
+
+@media (min-width: 1024px) {
+  /* Home page specific layout */
+  body.proof-route-home .screen {
+    background: #F3F4F6 !important;
+  }
+  
+  body.proof-route-home .screen > .pad,
+  body.proof-route-home .screen > div {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  
+  /* Wrapper for home content */
+  body.proof-route-home .ref-home-wrapper {
+    padding: 32px 40px 80px 40px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  
+  /* Hero Section - Navy Blue Card */
+  .ref-hero {
+    background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+    border-radius: 20px;
+    padding: 32px 40px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .ref-hero::before {
+    content: '';
+    position: absolute;
+    right: -50px;
+    top: -50px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  
+  .ref-hero-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .ref-hero h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0 0 8px 0;
+  }
+  
+  .ref-hero p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.8);
+    margin: 0 0 24px 0;
+  }
+  
+  .ref-hero-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  
+  .ref-stat-card {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .ref-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  
+  .ref-stat-icon--streak {
+    background: rgba(251, 191, 36, 0.2);
+  }
+  
+  .ref-stat-icon--xp {
+    background: rgba(245, 158, 11, 0.2);
+  }
+  
+  .ref-stat-icon--skills {
+    background: rgba(139, 92, 246, 0.2);
+  }
+  
+  .ref-stat-icon--nim {
+    background: rgba(251, 191, 36, 0.2);
+  }
+  
+  .ref-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1;
+  }
+  
+  .ref-stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+  }
+  
+  /* Main Content Grid */
+  .ref-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  
+  /* Panel Styles */
+  .ref-panel {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    padding: 24px;
+  }
+  
+  .ref-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .ref-panel-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+  
+  .ref-panel-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6366F1;
+    text-decoration: none;
+  }
+  
+  .ref-panel-link:hover {
+    color: #4F46E5;
+  }
+  
+  /* Continue Learning Card */
+  .ref-course-card {
+    display: flex;
+    gap: 20px;
+    padding: 16px;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    background: #F9FAFB;
+  }
+  
+  .ref-course-thumb {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1E293B, #334155);
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    font-size: 48px;
+  }
+  
+  .ref-course-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .ref-course-info h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 4px 0;
+  }
+  
+  .ref-course-info p {
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0 0 12px 0;
+  }
+  
+  .ref-course-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: #6B7280;
+    margin-top: 12px;
+  }
+  
+  .ref-course-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .ref-progress-bar {
+    height: 6px;
+    background: #E5E7EB;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  
+  .ref-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366F1, #8B5CF6);
+    border-radius: 3px;
+  }
+  
+  .ref-progress-text {
+    font-size: 12px;
+    color: #6B7280;
+    text-align: right;
+  }
+  
+  /* Today's Proof Card */
+  .ref-proof-card {
+    background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(139,92,246,0.05));
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  
+  .ref-proof-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    background: rgba(99,102,241,0.1);
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #6366F1;
+    margin-bottom: 12px;
+  }
+  
+  .ref-proof-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 8px 0;
+  }
+  
+  .ref-proof-card p {
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0 0 16px 0;
+  }
+  
+  .ref-proof-reward {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .ref-proof-reward-badge {
+    padding: 6px 12px;
+    background: rgba(251,191,36,0.1);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #D97706;
+  }
+  
+  .ref-proof-reward-label {
+    font-size: 13px;
+    color: #6B7280;
+  }
+  
+  .ref-proof-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #3730A3, #4C1D95);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .ref-proof-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(55,48,163,0.3);
+  }
+  
+  /* Skills Grid */
+  .ref-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+  }
+  
+  .ref-skill-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 16px;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    background: #F9FAFB;
+  }
+  
+  .ref-skill-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  
+  .ref-skill-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+  }
+  
+  .ref-skill-progress {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6B7280;
+    margin-bottom: 6px;
+  }
+  
+  .ref-skill-level {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  
+  .ref-skill-level--proficient {
+    background: #D1FAE5;
+    color: #065F46;
+  }
+  
+  .ref-skill-level--intermediate {
+    background: #DBEAFE;
+    color: #1E40AF;
+  }
+  
+  .ref-skill-level--learning {
+    background: #FEF3C7;
+    color: #92400E;
+  }
+  
+  /* Achievements */
+  .ref-achievements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .ref-achievement-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #F9FAFB;
+    border-radius: 10px;
+  }
+  
+  .ref-achievement-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #FEF3C7;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  
+  .ref-achievement-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .ref-achievement-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 2px;
+  }
+  
+  .ref-achievement-desc {
+    font-size: 12px;
+    color: #6B7280;
+  }
+  
+  .ref-achievement-reward {
+    font-size: 12px;
+    font-weight: 700;
+    color: #D97706;
+    white-space: nowrap;
+  }
+  
+  /* Recommended Section */
+  .ref-recommended-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  
+  .ref-recommended-card {
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 16px;
+    background: #FFFFFF;
+  }
+  
+  .ref-recommended-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 4px 0;
+  }
+  
+  .ref-recommended-card p {
+    font-size: 13px;
+    color: #6B7280;
+    margin: 0 0 12px 0;
+  }
+  
+  .ref-recommended-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #6B7280;
+    margin-bottom: 8px;
+  }
+  
+  .ref-recommended-badge {
+    padding: 4px 10px;
+    background: #F3F4F6;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #6B7280;
+  }
+  
+  /* Bottom Sections */
+  .ref-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  
+  .ref-trending-list,
+  .ref-sponsored-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* Mobile - hide reference home, show existing mobile layout */
+@media (max-width: 1023px) {
+  .ref-hero,
+  .ref-main-grid,
+  .ref-recommended-grid,
+  .ref-bottom-grid {
+    display: none !important;
+  }
+}

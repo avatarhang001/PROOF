@@ -1,0 +1,126 @@
+/* ==========================================================================
+   PROOF Reference Layout - Exact Match to Screenshot Design
+   Single sidebar + top bar layout for all pages
+   ========================================================================== */
+
+/* Apply only on desktop AND not on onboarding */
+@media (min-width: 1024px) {
+  
+  /* Hide old navigation only on authenticated pages */
+  body:not(.proof-route-onboarding) .nav {
+    display: none !important;
+  }
+  
+  body:not(.proof-route-onboarding) {
+    background: #F3F4F6;
+    margin: 0;
+    padding: 0;
+  }
+  
+  html[data-theme="dark"] body:not(.proof-route-onboarding) {
+    background: #1F2437;
+  }
+  
+  /* Main app container - not on onboarding */
+  body:not(.proof-route-onboarding) #app {
+    max-width: 100% !important;
+    box-shadow: none !important;
+  }
+  
+  /* Screen/content wrapper - not on onboarding */
+  body:not(.proof-route-onboarding) .screen {
+    margin-left: 240px !important;
+    padding-top: 80px !important;
+    min-height: 100vh;
+    background: #F3F4F6 !important;
+    width: calc(100% - 240px) !important;
+    max-width: none !important;
+  }
+  
+  html[data-theme="dark"] body:not(.proof-route-onboarding) .screen {
+    background: #1F2437 !important;
+  }
+  
+  body:not(.proof-route-onboarding) .screen > .pad {
+    padding: 32px 40px !important;
+    max-width: none !important;
+  }
+  
+  /* Override any max-width constraints on content */
+  body:not(.proof-route-onboarding) .screen > * {
+    max-width: none !important;
+  }
+  
+  /* Hide home page's built-in sidebar/header when global layout is active */
+  body:not(.proof-route-onboarding) .proof-desktop-layout > .proof-sidebar {
+    display: none !important;
+  }
+  
+  body:not(.proof-route-onboarding) .proof-desktop-layout > .proof-main-content > .proof-desktop-header {
+    display: none !important;
+  }
+  
+  /* Make home page content full width when using global layout */
+  body.proof-route-home .proof-desktop-layout {
+    display: block !important;
+  }
+  
+  body.proof-route-home .proof-main-content {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+  
+  body.proof-route-home .proof-content-scroll {
+    padding-top: 0 !important;
+  }
+  
+  /* ══════════════════════════════════════════════════════════════════
+     LEFT SIDEBAR - Only on authenticated pages
+     ══════════════════════════════════════════════════════════════════ */
+  
+  /* Create sidebar container if it doesn't exist */
+  body:not(.proof-route-onboarding)::before {
+    content: '';
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 240px;
+    height: 100vh;
+    background: #FFFFFF;
+    border-right: 1px solid #E5E7EB;
+    z-index: 1000;
+  }
+  
+  html[data-theme="dark"] body:not(.proof-route-onboarding)::before {
+    background: #1E293B;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* ══════════════════════════════════════════════════════════════════
+     TOP BAR - Only on authenticated pages
+     ══════════════════════════════════════════════════════════════════ */
+  
+  /* Create top bar container if it doesn't exist */
+  body:not(.proof-route-onboarding)::after {
+    content: '';
+    position: fixed;
+    left: 240px;
+    top: 0;
+    right: 0;
+    height: 80px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E5E7EB;
+    z-index: 999;
+  }
+  
+  html[data-theme="dark"] body:not(.proof-route-onboarding)::after {
+    background: #1E293B;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+}
+
+/* Mobile - keep existing mobile layout */
+@media (max-width: 1023px) {
+  /* Mobile layout unchanged */
+}

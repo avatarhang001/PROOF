@@ -1,0 +1,110 @@
+/**
+ * Dark Mode Fixes - Minimal Overrides Only
+ * Created: September 9, 2026
+ * Purpose: Fix specific components that don't use CSS variables
+ * The primary dark mode system uses CSS variables in styles.css
+ */
+
+/* Fix code blocks - hardcoded colors in HTML */
+html[data-theme="dark"] .code-block {
+  background: #0A0C18;
+  color: #E8ECF8;
+  border: 1px solid var(--line);
+}
+
+html[data-theme="dark"] .input-mono {
+  background: #0A0C18;
+  color: #E8ECF8;
+  border-color: var(--line-2);
+}
+
+/* Fix select dropdown options - browser native styling */
+html[data-theme="dark"] select option {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* Fix scrollbar in dark mode (webkit browsers) */
+html[data-theme="dark"] ::-webkit-scrollbar {
+  background: var(--surface);
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border-radius: 4px;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* Fix selection color in dark mode */
+html[data-theme="dark"] ::selection {
+  background: rgba(35, 173, 153, .4);
+  color: var(--ink);
+}
+
+/* Fix modal/sheet overlays - need explicit colors for layering */
+html[data-theme="dark"] .modal-overlay {
+  background: rgba(10, 12, 26, .85);
+}
+
+html[data-theme="dark"] .sheet-veil {
+  background: rgba(10, 12, 26, .75);
+}
+
+/* Fix generating overlay (path generation) - uses hardcoded white */
+html[data-theme="dark"] .generating-overlay {
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .generating-label {
+  color: rgba(255, 255, 255, .65) !important;
+}
+
+html[data-theme="dark"] .generating-title {
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .generating-goal {
+  color: rgba(255, 255, 255, .75) !important;
+}
+
+html[data-theme="dark"] .gen-tick {
+  border: 2px solid rgba(255, 255, 255, .35) !important;
+  color: rgba(255, 255, 255, .7) !important;
+}
+
+html[data-theme="dark"] .generating-step {
+  color: #FFFFFF !important;
+}
+
+/* Print styles - revert to light theme for printing */
+@media print {
+  html[data-theme="dark"] {
+    --bg: #FFFFFF;
+    --surface: #FFFFFF;
+    --ink: #1F2348;
+    --ink-2: rgba(31, 35, 72, .8);
+    --line: rgba(31, 35, 72, .12);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  html[data-theme="dark"] {
+    --ink: #FFFFFF;
+    --ink-2: rgba(255, 255, 255, .95);
+    --line-2: rgba(255, 255, 255, .3);
+    --primary: #5FB8FF;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="dark"] * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

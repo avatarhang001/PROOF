@@ -1,0 +1,74 @@
+<svg width="1350" height="870" viewBox="0 0 1350 870" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1350" y2="870" gradientUnits="userSpaceOnUse">
+<stop stop-color="#0A1238"/>
+<stop offset="0.5" stop-color="#1a2456"/>
+<stop offset="1" stop-color="#2d3870"/>
+</linearGradient>
+<radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+<stop offset="0" stop-color="#FFB11B" stop-opacity="0.6"/>
+<stop offset="0.5" stop-color="#FFA500" stop-opacity="0.3"/>
+<stop offset="1" stop-color="#FF8C00" stop-opacity="0"/>
+</radialGradient>
+<filter id="blur">
+<feGaussianBlur stdDeviation="40"/>
+</filter>
+</defs>
+
+<!-- Background -->
+<rect width="1350" height="870" rx="50" fill="url(#bg)"/>
+
+<!-- Glowing orb -->
+<circle cx="950" cy="280" r="180" fill="url(#glow)" filter="url(#blur)"/>
+<circle cx="950" cy="280" r="120" fill="#FFB11B" opacity="0.4"/>
+
+<!-- Code lines - colorful section -->
+<g stroke-linecap="round">
+<!-- Cyan lines -->
+<rect x="136" y="148" width="50" height="28" rx="14" fill="#4DD4E8"/>
+<rect x="204" y="148" width="338" height="28" rx="14" fill="#4DD4E8"/>
+
+<!-- Purple line -->
+<rect x="136" y="193" width="50" height="28" rx="14" fill="#7B68EE"/>
+<rect x="204" y="193" width="194" height="28" rx="14" fill="#7B68EE"/>
+
+<!-- Orange/Yellow line -->
+<rect x="136" y="238" width="50" height="28" rx="14" fill="#FFB11B"/>
+<rect x="204" y="238" width="298" height="28" rx="14" fill="#FFB11B"/>
+
+<!-- Purple lines with gap -->
+<rect x="136" y="283" width="50" height="28" rx="14" fill="#7B68EE"/>
+<rect x="204" y="283" width="250" height="28" rx="14" fill="#7B68EE"/>
+<rect x="474" y="283" width="78" height="28" rx="14" fill="#7B68EE"/>
+
+<!-- Cyan line -->
+<rect x="136" y="328" width="50" height="28" rx="14" fill="#4DD4E8"/>
+<rect x="204" y="328" width="198" height="28" rx="14" fill="#4DD4E8"/>
+
+<!-- Purple line -->
+<rect x="136" y="373" width="50" height="28" rx="14" fill="#7B68EE"/>
+<rect x="204" y="373" width="234" height="28" rx="14" fill="#7B68EE"/>
+
+<!-- Orange/Yellow line -->
+<rect x="136" y="418" width="50" height="28" rx="14" fill="#FFB11B"/>
+<rect x="204" y="418" width="360" height="28" rx="14" fill="#FFB11B"/>
+</g>
+
+<!-- White/light text lines at bottom -->
+<g opacity="0.85">
+<rect x="136" y="518" width="594" height="28" rx="14" fill="#E8E8F0"/>
+<rect x="136" y="563" width="418" height="28" rx="14" fill="#E8E8F0"/>
+<rect x="136" y="608" width="654" height="28" rx="14" fill="#E8E8F0"/>
+<rect x="136" y="653" width="334" height="28" rx="14" fill="#E0DDE8"/>
+<rect x="494" y="653" width="138" height="28" rx="14" fill="#E0DDE8"/>
+<rect x="136" y="698" width="538" height="28" rx="14" fill="#E0DDE8"/>
+</g>
+
+<!-- Hexagonal shield with checkmark (bottom right) -->
+<g transform="translate(1090 590)">
+<!-- Shield outline -->
+<path d="M 60 0 L 120 20 L 120 80 Q 120 140 60 170 Q 0 140 0 80 L 0 20 Z" fill="#3d2f1a" stroke="#FFB11B" stroke-width="8" stroke-linejoin="round"/>
+<!-- Checkmark -->
+<path d="M 35 85 L 55 105 L 95 55" stroke="#FFB11B" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</g>
+</svg>

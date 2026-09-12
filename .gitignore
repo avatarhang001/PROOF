@@ -1,0 +1,9 @@
+node_modules/
+data/
+.env
+*.log
+.DS_Store
+.impeccable
+prompt.txt
+patches/
+PROOF\scripts

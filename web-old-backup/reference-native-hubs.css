@@ -1,0 +1,109 @@
+/*
+ * PROOF reference styling for the ORIGINAL feature-rich hub renderers.
+ * Important: this file styles existing markup only. It does not replace
+ * learning, review, proof, wallet, goal, badge, tree, transaction or auth flows.
+ */
+
+.proof-hub-screen{min-height:100%}
+.proof-hub-screen>.pad{width:min(1180px,100%);margin:0 auto;padding:12px 22px 64px!important;color:#171a3a}
+.proof-hub-screen .h1{font:800 27px/1.1 var(--font);letter-spacing:-.045em;color:#171a3a}
+.proof-hub-screen .h2{letter-spacing:-.03em}
+.proof-hub-screen .sub{color:#77798f}
+.proof-hub-screen .section{margin-top:15px}
+.proof-hub-screen .section-head{margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.proof-hub-screen .eyebrow{font:700 10.5px/1 var(--font);letter-spacing:.14em;color:#746f91}
+.proof-hub-screen .card{border:1px solid #e5e5ef;border-radius:15px;background:#fff;box-shadow:0 8px 26px rgba(31,28,80,.035)}
+.proof-hub-screen .card-click{transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.proof-hub-screen .card-click:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(42,30,95,.08);border-color:#d9d5ef}
+.proof-hub-screen .bar{height:6px;background:#e6e5ee;border-radius:99px;overflow:hidden}
+.proof-hub-screen .bar i{background:#6848e8!important;border-radius:inherit}
+.proof-hub-screen .chip-primary{background:#f0eeff;color:#5d47d9;border-color:#ded8ff}
+.proof-hub-screen .chip-nim{background:#fff4da;color:#9a6507;border-color:#ffdc93}
+
+/* ───────── Learn hub ───────── */
+.proof-route-learn .proof-hub-screen>.pad>.row-between:first-child{min-height:64px;margin-bottom:10px}
+.proof-route-learn .proof-hub-screen>.pad>.row-between:first-child:after{content:'Build a skill path that turns practice into proof.';font-size:10px;color:#7d7f94;position:absolute;margin-top:42px;margin-left:0}
+.proof-route-learn .proof-hub-screen>.pad>.card:first-of-type{background:linear-gradient(105deg,#24134e,#321b70 65%,#42208b)!important;border:0!important;color:#fff!important;padding:20px 23px!important;box-shadow:0 15px 35px rgba(38,21,79,.14)!important;border-radius:16px!important;position:relative;overflow:hidden}
+.proof-route-learn .proof-hub-screen>.pad>.card:first-of-type:after{content:'🔥';position:absolute;right:32px;top:22px;font-size:45px;opacity:.9}
+.proof-route-learn .proof-hub-screen>.pad>.card:first-of-type .tiny,.proof-route-learn .proof-hub-screen>.pad>.card:first-of-type b{color:#fff!important}
+.proof-route-learn .proof-hub-screen>.pad>.card:first-of-type .stat{background:rgba(10,5,38,.28)!important;border-color:rgba(255,255,255,.12)!important}
+.proof-route-learn .proof-hub-screen>.pad>.section:nth-of-type(2){display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.8fr);gap:14px}
+.proof-route-learn .proof-hub-screen>.pad>.section:nth-of-type(2)>.section-head{grid-column:1/-1}
+.proof-route-learn .proof-hub-screen>.pad>.section:nth-of-type(2) .stack{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.proof-route-learn .proof-hub-screen>.pad>.section:nth-of-type(2) .stack .card{padding:14px!important}
+.proof-route-learn .proof-hub-screen>.pad>.section:nth-of-type(2) .stack .card:first-child{grid-column:1/-1}
+.proof-route-learn .proof-hub-screen>.pad>.section:nth-of-type(2) .grid2{grid-column:1/-1}
+.proof-route-learn .proof-hub-screen>.pad>.section:last-child{margin-top:18px}
+.proof-route-learn .skill-card{min-height:104px!important;padding:14px!important;border-radius:12px!important}
+.proof-route-learn .skill-card .skill-emoji{font-size:23px!important}
+.proof-route-learn .skill-card b{font-size:11px!important}
+.proof-route-learn .skill-card .tiny{font-size:10.5px!important;line-height:1.35}
+
+/* ───────── Review hub ───────── */
+.proof-route-reviews .proof-hub-screen>.pad>.row-between:first-child{min-height:64px;margin-bottom:8px}
+.proof-route-reviews .proof-hub-screen>.pad>.card:first-of-type{background:linear-gradient(105deg,#24134e,#321b70 65%,#42208b)!important;border:0!important;color:#fff!important;padding:20px!important;border-radius:16px!important;box-shadow:0 15px 35px rgba(38,21,79,.14)!important}
+.proof-route-reviews .proof-hub-screen>.pad>.card:first-of-type b,.proof-route-reviews .proof-hub-screen>.pad>.card:first-of-type .tiny{color:#fff!important}
+.proof-route-reviews .proof-hub-screen>.pad>.card:first-of-type .avatar{background:rgba(255,255,255,.13)!important}
+.proof-route-reviews .proof-hub-screen>.pad>.section{margin-top:14px}
+.proof-route-reviews .proof-hub-screen>.pad>.section:nth-of-type(2){display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.75fr);gap:14px}
+.proof-route-reviews .proof-hub-screen>.pad>.section:nth-of-type(2)>.section-head{grid-column:1/-1}
+.proof-route-reviews .proof-hub-screen>.pad>.section:nth-of-type(2) .stack{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.proof-route-reviews .proof-hub-screen>.pad>.section:nth-of-type(2) .stack .card{padding:13px 14px!important}
+.proof-route-reviews .proof-hub-screen>.pad>.section:nth-of-type(2) .stack .card:first-child{grid-column:1/-1}
+.proof-route-reviews .proof-hub-screen>.pad>.section:nth-of-type(2)>.card{padding:14px!important}
+.proof-route-reviews .proof-hub-screen>.pad>.section:nth-of-type(2) .stat{background:#fafaff!important;border:1px solid #e8e8f0!important}
+
+/* ───────── Prove hub ───────── */
+.proof-route-prove .proof-hub-screen>.pad>.row-between:first-child{min-height:64px;margin-bottom:8px}
+.proof-route-prove .proof-hub-screen>.pad>#dailyCard{background:linear-gradient(105deg,#24134e,#321b70 65%,#42208b)!important;color:#fff!important;border:0!important;border-radius:16px!important;padding:21px 23px!important;box-shadow:0 15px 35px rgba(38,21,79,.14)!important;position:relative;overflow:hidden}
+.proof-route-prove .proof-hub-screen>.pad>#dailyCard:after{content:'🛡️';position:absolute;right:30px;top:23px;font-size:48px;opacity:.9}
+.proof-route-prove .proof-hub-screen>.pad>#dailyCard .eyebrow,.proof-route-prove .proof-hub-screen>.pad>#dailyCard .sub{color:#d9d4e9!important}
+.proof-route-prove .proof-hub-screen>.pad>#dailyCard b{color:#fff!important;max-width:65%;position:relative;z-index:2}
+.proof-route-prove .proof-hub-screen>.pad>.section .stack{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.proof-route-prove .proof-hub-screen>.pad>.section .stack .card{padding:13px 15px!important}
+.proof-route-prove .proof-hub-screen>.pad>.section .stack .card:nth-child(odd):last-child{grid-column:1/-1}
+.proof-route-prove .proof-hub-screen>.pad>.section:last-of-type{display:grid;grid-template-columns:1.25fr .9fr;gap:14px}
+.proof-route-prove .proof-hub-screen>.pad>.section:last-of-type>.section-head{grid-column:1/-1}
+.proof-route-prove .proof-hub-screen>.pad>.section:last-of-type .stack{grid-column:1/-1}
+
+/* ───────── Profile hub ───────── */
+.proof-route-profile .proof-hub-screen>.pad>.row-between:first-child{min-height:64px;margin-bottom:8px}
+.proof-route-profile .proof-hub-screen>.pad>.card.card-hero:first-of-type{background:linear-gradient(105deg,#24134e,#321b70 65%,#42208b)!important;border:0!important;color:#fff!important;padding:22px 24px!important;border-radius:16px!important;box-shadow:0 15px 35px rgba(38,21,79,.14)!important}
+.proof-route-profile .proof-hub-screen>.pad>.card.card-hero:first-of-type b,.proof-route-profile .proof-hub-screen>.pad>.card.card-hero:first-of-type .tiny{color:#fff!important}
+.proof-route-profile .proof-hub-screen>.pad>.card.card-hero:first-of-type .stat{background:rgba(10,5,38,.28)!important;border-color:rgba(255,255,255,.12)!important}
+.proof-route-profile .proof-hub-screen>.pad>.card.mt12{border-radius:14px!important}
+.proof-route-profile .proof-hub-screen>.pad>#skillsZone,.proof-route-profile .proof-hub-screen>.pad>#achievementsZone,.proof-route-profile .proof-hub-screen>.pad>#txZone{margin-top:15px}
+.proof-route-profile .proof-hub-screen>.pad .tree-wrap{height:320px!important;overflow:auto}
+.proof-route-profile .proof-hub-screen>.pad #skillsZone .grid2,.proof-route-profile .proof-hub-screen>.pad #achievementsZone .grid2{gap:9px}
+.proof-route-profile .proof-hub-screen>.pad #skillsZone .card,.proof-route-profile .proof-hub-screen>.pad #achievementsZone .card,.proof-route-profile .proof-hub-screen>.pad #txZone .card{border-radius:12px!important}
+
+/* Keep native functionality visually coherent with the chosen reference. */
+.proof-hub-screen button,.proof-hub-screen a{font-family:var(--font)}
+.proof-hub-screen button:focus-visible,.proof-hub-screen a:focus-visible{outline:3px solid rgba(102,72,232,.24);outline-offset:2px}
+
+@media(max-width:1023px){
+  .proof-hub-screen>.pad{padding:8px 14px 92px!important}
+  .proof-route-learn .proof-hub-screen>.pad>.section:nth-of-type(2),.proof-route-reviews .proof-hub-screen>.pad>.section:nth-of-type(2),.proof-route-prove .proof-hub-screen>.pad>.section:last-of-type{display:block}
+  .proof-route-learn .proof-hub-screen>.pad>.section:nth-of-type(2) .stack,.proof-route-reviews .proof-hub-screen>.pad>.section:nth-of-type(2) .stack,.proof-route-prove .proof-hub-screen>.pad>.section .stack{display:block}
+  .proof-route-learn .proof-hub-screen>.pad>.section:nth-of-type(2) .stack .card,.proof-route-reviews .proof-hub-screen>.pad>.section:nth-of-type(2) .stack .card,.proof-route-prove .proof-hub-screen>.pad>.section .stack .card{margin-bottom:9px}
+  .proof-route-profile .proof-hub-screen>.pad>.card.card-hero:first-of-type{padding:18px!important}
+}
+
+@media(max-width:640px){
+  .proof-hub-screen>.pad{padding:5px 9px 88px!important}
+  .proof-hub-screen .h1{font-size:21px}
+  .proof-hub-screen .section{margin-top:11px}
+  .proof-route-learn .proof-hub-screen>.pad>.row-between:first-child,.proof-route-reviews .proof-hub-screen>.pad>.row-between:first-child,.proof-route-prove .proof-hub-screen>.pad>.row-between:first-child,.proof-route-profile .proof-hub-screen>.pad>.row-between:first-child{min-height:54px}
+  .proof-route-learn .proof-hub-screen>.pad>.row-between:first-child:after{display:none}
+  .proof-route-learn .proof-hub-screen>.pad>.card:first-of-type{padding:17px!important;border-radius:14px!important}
+  .proof-route-learn .proof-hub-screen>.pad>.card:first-of-type:after{right:17px;top:18px;font-size:32px}
+  .proof-route-learn .proof-hub-screen>.pad>.section:nth-of-type(2) .stack .card{padding:12px!important}
+  .proof-route-learn .skill-card{min-height:92px!important}
+  .proof-route-reviews .proof-hub-screen>.pad>.card:first-of-type{padding:17px!important;border-radius:14px!important}
+  .proof-route-reviews .proof-hub-screen>.pad>.section:nth-of-type(2) .stack .card{padding:11px!important}
+  .proof-route-prove .proof-hub-screen>.pad>#dailyCard{padding:17px!important;border-radius:14px!important}
+  .proof-route-prove .proof-hub-screen>.pad>#dailyCard:after{right:16px;top:18px;font-size:34px}
+  .proof-route-profile .proof-hub-screen>.pad>.card.card-hero:first-of-type{padding:17px!important;border-radius:14px!important}
+  .proof-route-profile .proof-hub-screen>.pad .tree-wrap{height:260px!important}
+  .proof-route-profile .proof-hub-screen>.pad .grid3{grid-template-columns:repeat(2,1fr)!important}
+}
