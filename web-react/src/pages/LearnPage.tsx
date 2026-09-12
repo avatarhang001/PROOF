@@ -322,25 +322,25 @@ function LearnHubView() {
       {paths.length === 0 && (
         <Reveal delay={0.1}>
           <div
-            className="rounded-2xl p-7 shadow-sm"
+            className="rounded-2xl p-7 shadow-hero"
             style={{
-              background: 'linear-gradient(135deg, var(--brand-soft), var(--nim-soft))',
+              background: 'var(--grad-hero)',
             }}
           >
             <div className="mb-2.5 text-4xl leading-none">✨</div>
             <h2 className="text-xl font-bold text-white">Start your learning journey</h2>
-            <p className="mt-2.5 text-[15px] leading-relaxed text-white/90">
+            <p className="mt-2.5 max-w-2xl text-[15px] leading-relaxed text-white/90">
               Tell PROOF what you want to learn — get a personalized path with proof checkpoints and NIM rewards.
             </p>
-            <div className="mt-5 flex gap-3">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <button 
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 font-semibold text-white shadow-lg transition-transform hover:scale-[1.02]"
+                className="flex w-full flex-1 items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 font-semibold text-ink shadow-lg transition-transform hover:scale-[1.02] sm:w-auto"
                 onClick={() => setShowCreateModal(true)}
               >
                 <span className="text-lg">✨</span> Create Path
               </button>
               <button 
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-teal-500 px-5 py-3 font-semibold text-white shadow-lg transition-transform hover:scale-[1.02] hover:bg-teal-600"
+                className="flex w-full flex-1 items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 font-semibold text-white shadow-lg transition-transform hover:scale-[1.02] hover:bg-brand-hover sm:w-auto"
                 onClick={() => navigate('/learn/upload')}
               >
                 <span className="text-lg">📄</span> Upload Document
