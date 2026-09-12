@@ -10,8 +10,8 @@ export const structuredData = {
     "@type": "Organization",
     "name": "PROOF",
     "alternateName": "PROOF Learning Platform",
-    "url": "https://proof-production-nimiq.up.railway.app",
-    "logo": "https://proof-production-nimiq.up.railway.app/assets/proof-logo.svg",
+    "url": "https://proofnim.vercel.app",
+    "logo": "https://proofnim.vercel.app/assets/proof-logo.svg",
     "description": "Turn learning into demonstrated ability and earn NIM cryptocurrency rewards",
     "foundingDate": "2024",
     "contactPoint": {
@@ -36,7 +36,7 @@ export const structuredData = {
     "provider": {
       "@type": "Organization",
       "name": "PROOF",
-      "url": "https://proof-production-nimiq.up.railway.app"
+      "url": "https://proofnim.vercel.app"
     },
     "educationalLevel": level || "Beginner",
     "timeRequired": duration || "PT30M",
@@ -109,7 +109,7 @@ export const structuredData = {
     "@type": "HowTo",
     "name": "How to Get Started with PROOF",
     "description": "Learn how to start earning NIM by learning and proving new skills on PROOF",
-    "image": "https://proof-production-nimiq.up.railway.app/assets/og-image.png",
+    "image": "https://proofnim.vercel.app/assets/og-image.png",
     "totalTime": "PT5M",
     "estimatedCost": {
       "@type": "MonetaryAmount",
@@ -126,28 +126,28 @@ export const structuredData = {
         "position": 1,
         "name": "Connect Your Wallet",
         "text": "Connect your Nimiq wallet (Hub, Pay, or Demo) to get started",
-        "url": "https://proof-production-nimiq.up.railway.app/?view=onboarding"
+        "url": "https://proofnim.vercel.app/?view=onboarding"
       },
       {
         "@type": "HowToStep",
         "position": 2,
         "name": "Choose a Skill",
         "text": "Select a skill you want to learn from web development, Python, design, and more",
-        "url": "https://proof-production-nimiq.up.railway.app/?view=learn"
+        "url": "https://proofnim.vercel.app/?view=learn"
       },
       {
         "@type": "HowToStep",
         "position": 3,
         "name": "Complete Challenges",
         "text": "Work through AI-generated lessons and complete practical challenges to prove your understanding",
-        "url": "https://proof-production-nimiq.up.railway.app/?view=prove"
+        "url": "https://proofnim.vercel.app/?view=prove"
       },
       {
         "@type": "HowToStep",
         "position": 4,
         "name": "Earn NIM Rewards",
         "text": "Receive NIM cryptocurrency rewards for each successfully completed challenge",
-        "url": "https://proof-production-nimiq.up.railway.app/?view=profile"
+        "url": "https://proofnim.vercel.app/?view=profile"
       }
     ]
   },
