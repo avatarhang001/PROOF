@@ -3,11 +3,9 @@
  * Base URL configured via environment variable
  */
 
-// In development, use Vite's proxy (/api -> http://localhost:3001/api)
-// In production, use the VITE_API_URL environment variable or same-origin
-const API_BASE = import.meta.env.DEV 
-  ? '' // Use Vite proxy in development
-  : (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+// Keep API requests same-origin so session cookies are first-party. Vite and
+// Vercel proxy /api to the backend in development and production respectively.
+const API_BASE = '';
 
 export class ApiError extends Error {
   constructor(
