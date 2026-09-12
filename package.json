@@ -2,6 +2,7 @@
   "name": "proof-mini-app",
   "version": "0.1.0",
   "description": "PROOF — Learn it. Prove it. Earn it. An AI skill-verification marketplace on Nimiq.",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "engines": {
