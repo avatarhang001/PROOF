@@ -176,9 +176,23 @@ export class AuthService {
   }
 }
 
-export function sessionCookie(token, maxAgeS = 30 * 24 * 3600) {
-  // Use SameSite=Lax for localhost to avoid cookie issues
-  const sameSite = process.env.NODE_ENV === 'production' ? 'Strict' : 'Lax';
-  return `proof_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=${sameSite}; Max-Age=${maxAgeS}`;
+function crossSiteCookie(request) {
+  const origin = request?.headers?.origin || '';
+  return process.env.NODE_ENV === 'production' || origin.startsWith('https://');
 }
-export const CLEAR_COOKIE = 'proof_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0';
+
+export function sessionCookie(token, maxAgeS = 30 * 24 * 3600, request) {
+  // The web app and API are deployed on different origins in production.
+  // Cross-site session cookies require SameSite=None and Secure over HTTPS.
+  const attributes = crossSiteCookie(request)
+    ? 'SameSite=None; Secure'
+    : 'SameSite=Lax';
+  return `proof_session=${encodeURIComponent(token)}; Path=/; HttpOnly; ${attributes}; Max-Age=${maxAgeS}`;
+}
+
+export function clearSessionCookie(request) {
+  const attributes = crossSiteCookie(request)
+    ? 'SameSite=None; Secure'
+    : 'SameSite=Lax';
+  return `proof_session=; Path=/; HttpOnly; ${attributes}; Max-Age=0`;
+}

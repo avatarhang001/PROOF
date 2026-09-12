@@ -9,7 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config, validateConfig } from './config.js';
 import { seed } from './seed.js';
-import { AuthService, sessionCookie, CLEAR_COOKIE } from './auth.js';
+import { AuthService, sessionCookie, clearSessionCookie } from './auth.js';
 import { UserService } from './services/users.js';
 import { SkillService } from './services/skills.js';
 import { RewardService } from './services/rewards.js';
@@ -148,7 +148,7 @@ route('POST', '/api/onboard', async (ctx) => {
   const user = await users.createUser({ isDemo: true });
   await users.update(user, { prefs: { goal: body.goal || '', level: body.level || '', minutesPerDay: body.minutesPerDay || 30, style: 'practical', interests: Array.isArray(body.interests) ? body.interests.slice(0, 6) : [] } });
   const token = await auth.createSession(user.id);
-  json(res, 201, { user: await publicMe(user), recommended: recommendNextSkill([]) }, { 'set-cookie': sessionCookie(token) });
+  json(res, 201, { user: await publicMe(user), recommended: recommendNextSkill([]) }, { 'set-cookie': sessionCookie(token, undefined, ctx.req) });
 });
 
 route('POST', '/api/auth/nonce', async (ctx) => {
@@ -248,7 +248,7 @@ route('POST', '/api/auth/verify', async (ctx) => {
 
   const token = await auth.createSession(user.id);
 
-  json(res, 200, { user: await publicMe(user), demo: mode === 'demo' }, { 'set-cookie': sessionCookie(token) });
+  json(res, 200, { user: await publicMe(user), demo: mode === 'demo' }, { 'set-cookie': sessionCookie(token, undefined, ctx.req) });
 });
 
 route('POST', '/api/wallet/demo', (ctx) => {
@@ -277,7 +277,7 @@ route('POST', '/api/auth/logout', (ctx) => {
   const { req, res } = ctx;
   const m = (req.headers.cookie || '').match(/proof_session=([^;]+)/);
   if (m) auth.destroySession(decodeURIComponent(m[1]));
-  json(res, 200, { ok: true }, { 'set-cookie': CLEAR_COOKIE });
+  json(res, 200, { ok: true }, { 'set-cookie': clearSessionCookie(req) });
 });
 
 async function publicMe(user) {
