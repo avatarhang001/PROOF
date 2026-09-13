@@ -18,7 +18,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   highlightSquares = [],
   disabled = false,
   showCoordinates = true,
-  animationDuration = 300,
+  animationDuration = 180,
   theme = 'classic',
 }) => {
   const [game, setGame] = useState<Chess>(() => new Chess(initialFen));
@@ -86,6 +86,39 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     return true;
   }, [game]);
 
+  const clearSelection = useCallback(() => {
+    setMoveFrom(null);
+    setOptionSquares({});
+  }, []);
+
+  const commitMove = useCallback((sourceSquare: ChessSquare, targetSquare: ChessSquare): boolean => {
+    if (disabled) return false;
+
+    try {
+      const gameCopy = new Chess(game.fen());
+      const move = gameCopy.move({
+        from: sourceSquare,
+        to: targetSquare,
+        promotion: 'q',
+      });
+
+      if (!move) {
+        clearSelection();
+        return false;
+      }
+
+      setGame(gameCopy);
+      setPosition(gameCopy.fen());
+      clearSelection();
+      onMove?.(move, gameCopy.fen());
+      return true;
+    } catch (error) {
+      console.error('Invalid move:', error);
+      clearSelection();
+      return false;
+    }
+  }, [clearSelection, disabled, game, onMove]);
+
   // Handle square click
   const onSquareClick = useCallback(
     (square: ChessSquare) => {
@@ -103,64 +136,33 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
 
       // Try to make a move
       try {
-        const moves = game.moves({
-          square: moveFrom,
-          verbose: true,
-        });
-        const foundMove = moves.find((m) => m.from === moveFrom && m.to === square);
-
-        if (foundMove) {
-          const gameCopy = new Chess(game.fen());
-          const move = gameCopy.move({
-            from: moveFrom,
-            to: square,
-            promotion: 'q', // Always promote to queen for simplicity
-          });
-
-          if (move) {
-            setGame(gameCopy);
-            setPosition(gameCopy.fen());
-            onMove?.(move, gameCopy.fen());
-          }
-        }
+        commitMove(moveFrom, square);
       } catch (error) {
         console.error('Invalid move:', error);
+        clearSelection();
       }
-
-      // Clear selection
-      setMoveFrom(null);
-      setOptionSquares({});
     },
-    [disabled, moveFrom, game, getMoveOptions, onMove]
+    [clearSelection, commitMove, disabled, game, getMoveOptions, moveFrom]
+  );
+
+  const onPieceDragBegin = useCallback(
+    (_piece: string, sourceSquare: ChessSquare) => {
+      if (disabled) return;
+      const piece = game.get(sourceSquare);
+      if (piece && piece.color === game.turn()) {
+        setMoveFrom(sourceSquare);
+        getMoveOptions(sourceSquare);
+      }
+    },
+    [disabled, game, getMoveOptions]
   );
 
   // Handle piece drop (drag and drop)
   const onPieceDrop = useCallback(
     (sourceSquare: ChessSquare, targetSquare: ChessSquare): boolean => {
-      if (disabled) return false;
-
-      try {
-        const gameCopy = new Chess(game.fen());
-        const move = gameCopy.move({
-          from: sourceSquare,
-          to: targetSquare,
-          promotion: 'q', // Always promote to queen
-        });
-
-        if (move === null) return false;
-
-        setGame(gameCopy);
-        setPosition(gameCopy.fen());
-        setMoveFrom(null);
-        setOptionSquares({});
-        onMove?.(move, gameCopy.fen());
-        return true;
-      } catch (error) {
-        console.error('Invalid move:', error);
-        return false;
-      }
+      return commitMove(sourceSquare, targetSquare);
     },
-    [disabled, game, onMove]
+    [commitMove]
   );
 
   // Handle right click for annotations
@@ -188,7 +190,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   };
 
   return (
-    <div ref={wrapperRef} className={`chess-board-wrapper theme-${theme} w-full min-w-0 max-w-[500px]`}>
+    <div ref={wrapperRef} className={`chess-board-wrapper theme-${theme} w-full min-w-0 max-w-[500px] select-none ${!disabled ? 'touch-none' : ''}`}>
       {boardWidth > 0 && (
         <Chessboard
           id={boardId}
@@ -196,11 +198,13 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
           // cannot briefly render a stale position while local state is synchronised.
           position={disabled ? initialFen : position}
           onPieceDrop={onPieceDrop}
+          onPieceDragBegin={onPieceDragBegin}
           onSquareClick={onSquareClick}
           onSquareRightClick={onSquareRightClick}
           boardOrientation={orientation}
           customSquareStyles={customSquareStyles}
           arePiecesDraggable={!disabled}
+          autoPromoteToQueen
           animationDuration={animationDuration}
           boardWidth={boardWidth}
           showBoardNotation={showCoordinates}

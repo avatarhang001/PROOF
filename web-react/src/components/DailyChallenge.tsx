@@ -41,7 +41,7 @@ export function DailyChallenge() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-2xl p-6 shadow-card" style={{ background: 'var(--grad-hero)' }}>
+    <div className="relative min-w-0 overflow-hidden rounded-2xl p-4 shadow-card sm:p-6" style={{ background: 'var(--grad-hero)' }}>
       {/* Background Accent */}
       <div
         className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 opacity-20"
@@ -51,26 +51,32 @@ export function DailyChallenge() {
       </div>
 
       <div className="relative">
-        {/* Badge */}
-        <div className="mb-4 flex items-center gap-2.5">
-          <div className="h-2 w-2 rounded-full bg-ok-deep shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-          <span className="text-[12px] font-bold uppercase tracking-wider text-white/75">Live Challenge</span>
+        {/* Header */}
+        <div className="mb-4 flex min-w-0 items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="h-2 w-2 shrink-0 rounded-full bg-ok-deep shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+            <span className="truncate text-[11px] font-bold uppercase tracking-[0.16em] text-white/75 sm:text-[12px]">Live Challenge</span>
+          </div>
         </div>
 
-        {/* Title */}
-        <h3 className="mb-2.5 font-display text-[20px] font-bold leading-tight text-white">
-          {challenge.title}
-        </h3>
+        <div className="mb-4 flex items-start gap-3">
+          <div className="min-w-0 flex-1 pr-1">
+            <h3 className="break-words font-display text-[18px] font-bold leading-tight text-white sm:text-[20px]">
+              {challenge.title}
+            </h3>
+          </div>
+
+          <div className="mt-0.5 inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-[#FFF5CC]/12 px-2.5 py-1.5 text-[11px] font-bold text-[#FFE79A] backdrop-blur-sm sm:text-[12.5px]">
+            <BoltIcon className="h-3.5 w-3.5 text-[#FFD76A] sm:h-4 sm:w-4" />
+            <span>+{challenge.xp} XP</span>
+          </div>
+        </div>
 
         {/* Description */}
-        <p className="mb-5 text-[14px] leading-relaxed text-white/75">{challenge.description}</p>
+        <p className="mb-5 max-w-[65ch] break-words text-[13px] leading-relaxed text-white/75 sm:text-[14px]">{challenge.description}</p>
 
         {/* Rewards */}
         <div className="mb-5 flex flex-wrap gap-2.5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-2 text-[12.5px] font-bold text-white backdrop-blur-sm">
-            <BoltIcon className="h-4 w-4 text-gold" />
-            +{challenge.xp} XP
-          </div>
           {challenge.badge && (
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-2 text-[12.5px] font-semibold text-gold">
               🏆 {challenge.badge}

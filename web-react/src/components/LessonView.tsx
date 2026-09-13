@@ -290,10 +290,10 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
 
   return (
     <>
-      <div className="mx-auto max-w-4xl space-y-6 p-6">
+      <div className="mx-auto w-full max-w-4xl space-y-4 p-4 sm:space-y-6 sm:p-6">
         {/* Header */}
         <Reveal>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-3 sm:gap-4">
             <Link
               to={`/learn/path/${pathId}`}
               className="text-sm font-semibold text-muted transition-colors hover:text-brand"
@@ -315,7 +315,7 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
 
         {/* Progress Stages */}
         <Reveal delay={0.05}>
-          <div className="flex items-center justify-between rounded-xl border border-line bg-surface p-4">
+          <div className="flex items-center justify-between rounded-xl border border-line bg-surface p-3 sm:p-4">
             {stages.map((s, idx) => (
               <button
                 key={s.key}
@@ -344,9 +344,9 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
 
         {/* Lesson Title */}
         <Reveal delay={0.1}>
-          <div className="rounded-2xl border border-line bg-surface p-6">
-            <h1 className="text-3xl font-bold text-ink">{lesson.title}</h1>
-            <p className="mt-3 text-lg leading-relaxed text-muted">{lesson.tldr}</p>
+          <div className="rounded-2xl border border-line bg-surface p-4 sm:p-6">
+            <h1 className="text-2xl font-bold text-ink sm:text-3xl">{lesson.title}</h1>
+            <p className="mt-3 text-base leading-relaxed text-muted sm:text-lg">{lesson.tldr}</p>
           </div>
         </Reveal>
 
@@ -354,15 +354,15 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
         {stage === 'hook' && (
           <Reveal delay={0.15}>
             <div className="space-y-4">
-              <div className="rounded-2xl border border-brand-soft bg-brand-soft/20 p-6">
-                <h2 className="mb-3 text-xl font-bold text-ink">🧭 Let's get oriented</h2>
+              <div className="rounded-2xl border border-brand-soft bg-brand-soft/20 p-4 sm:p-6">
+                <h2 className="mb-3 text-lg font-bold text-ink sm:text-xl">🧭 Let's get oriented</h2>
                 {lesson.ask && (
-                  <div className="mb-4 rounded-lg border border-line bg-elevated p-4">
+                  <div className="mb-4 rounded-lg border border-line bg-elevated p-3 sm:p-4">
                     <p className="font-semibold text-ink">Think about this:</p>
-                    <p className="mt-2 text-base text-muted">{lesson.ask}</p>
+                    <p className="mt-2 text-sm text-muted sm:text-base">{lesson.ask}</p>
                   </div>
                 )}
-                <p className="text-base text-muted">
+                <p className="text-sm text-muted sm:text-base">
                   Take a moment to think about what you already know. This helps your brain make connections to new information.
                 </p>
               </div>
@@ -382,13 +382,13 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
             <div className="space-y-6">
               {lesson.sections && lesson.sections.length > 0 ? (
                 lesson.sections.map((section, idx) => (
-                  <div key={idx} className="rounded-2xl border border-line bg-surface p-6">
-                    <h3 className="mb-3 text-xl font-bold text-ink">{section.h}</h3>
-                    <p className="text-base leading-relaxed text-muted">{section.body}</p>
+                  <div key={idx} className="rounded-2xl border border-line bg-surface p-4 sm:p-6">
+                    <h3 className="mb-3 text-lg font-bold text-ink sm:text-xl">{section.h}</h3>
+                    <p className="text-sm leading-relaxed text-muted sm:text-base">{section.body}</p>
                   </div>
                 ))
               ) : (
-                <div className="rounded-2xl border border-line bg-surface p-6">
+                <div className="rounded-2xl border border-line bg-surface p-4 sm:p-6">
                   <p className="text-muted">No lesson content available. Please try another lesson.</p>
                 </div>
               )}
@@ -398,8 +398,8 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
               )}
 
               {lesson.example && (skill !== 'chess' || lesson.example.code) && (
-                <div className="rounded-2xl border border-line bg-surface p-6">
-                  <h3 className="mb-3 text-xl font-bold text-ink">💡 Example</h3>
+                <div className="rounded-2xl border border-line bg-surface p-4 sm:p-6">
+                  <h3 className="mb-3 text-lg font-bold text-ink sm:text-xl">💡 Example</h3>
                   
                   {lesson.example.lang === 'fen' && lesson.example.fen ? (
                     // Chess board example
@@ -436,19 +436,19 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
               )}
 
               {lesson.misconception && (
-                <div className="rounded-2xl border border-warn-soft bg-warn-soft/20 p-6">
-                  <h3 className="mb-2 flex items-center gap-2 text-lg font-bold text-warn">
+                <div className="rounded-2xl border border-warn-soft bg-warn-soft/20 p-4 sm:p-6">
+                  <h3 className="mb-2 flex items-center gap-2 text-base font-bold text-warn sm:text-lg">
                     ⚠️ Common Misconception
                   </h3>
-                  <p className="text-base text-muted">{lesson.misconception}</p>
+                  <p className="text-sm text-muted sm:text-base">{lesson.misconception}</p>
                 </div>
               )}
 
-              <div className="rounded-2xl border border-ok-soft bg-ok-soft/20 p-6">
-                <h3 className="mb-3 text-lg font-bold text-ok">✓ Key Points</h3>
+              <div className="rounded-2xl border border-ok-soft bg-ok-soft/20 p-4 sm:p-6">
+                <h3 className="mb-3 text-base font-bold text-ok sm:text-lg">✓ Key Points</h3>
                 <ul className="space-y-2">
                   {lesson.keyPoints && lesson.keyPoints.map((point, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-base text-muted">
+                    <li key={idx} className="flex items-start gap-2 text-sm text-muted sm:text-base">
                       <span className="mt-1 text-ok">•</span>
                       <span>{point}</span>
                     </li>
@@ -472,14 +472,14 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
         {stage === 'quiz' && lesson.quiz && lesson.quiz.length > 0 && (
           <Reveal delay={0.15}>
             <div className="space-y-6">
-              <div className="rounded-2xl border border-line bg-surface p-6">
-                <h2 className="mb-4 text-2xl font-bold text-ink">❓ Quick Check</h2>
-                <p className="text-base text-muted">Answer these questions to check your understanding.</p>
+              <div className="rounded-2xl border border-line bg-surface p-4 sm:p-6">
+                <h2 className="mb-4 text-xl font-bold text-ink sm:text-2xl">❓ Quick Check</h2>
+                <p className="text-sm text-muted sm:text-base">Answer these questions to check your understanding.</p>
               </div>
 
               {lesson.quiz.map((q, qIdx) => (
-                <div key={qIdx} className="rounded-2xl border border-line bg-surface p-6">
-                  <p className="mb-4 font-semibold text-ink">
+                <div key={qIdx} className="rounded-2xl border border-line bg-surface p-4 sm:p-6">
+                  <p className="mb-4 text-sm font-semibold text-ink sm:text-base">
                     {qIdx + 1}. {q.q}
                   </p>
                   <div className="space-y-2">
@@ -541,16 +541,16 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
         {stage === 'recall' && lesson.recall && lesson.recall.length > 0 && (
           <Reveal delay={0.15}>
             <div className="space-y-6">
-              <div className="rounded-2xl border border-line bg-surface p-6">
-                <h2 className="mb-4 text-2xl font-bold text-ink">🧠 Active Recall</h2>
-                <p className="text-base text-muted">
+              <div className="rounded-2xl border border-line bg-surface p-4 sm:p-6">
+                <h2 className="mb-4 text-xl font-bold text-ink sm:text-2xl">🧠 Active Recall</h2>
+                <p className="text-sm text-muted sm:text-base">
                   Try to answer these from memory. The act of retrieving information strengthens your understanding.
                 </p>
               </div>
 
               {lesson.recall.map((prompt, idx) => (
-                <div key={idx} className="rounded-2xl border border-brand-soft bg-brand-soft/20 p-6">
-                  <p className="mb-3 font-semibold text-ink">{prompt}</p>
+                <div key={idx} className="rounded-2xl border border-brand-soft bg-brand-soft/20 p-4 sm:p-6">
+                  <p className="mb-3 text-sm font-semibold text-ink sm:text-base">{prompt}</p>
                   <textarea
                     placeholder="Type or think through your answer..."
                     className="w-full rounded-lg border border-line bg-white p-3 text-sm text-ink focus:border-brand focus:outline-none"
@@ -573,14 +573,14 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
         {stage === 'practice' && lesson.practice && lesson.practice.length > 0 && (
           <Reveal delay={0.15}>
             <div className="space-y-6">
-              <div className="rounded-2xl border border-line bg-surface p-6">
-                <h2 className="mb-4 text-2xl font-bold text-ink">✍️ Practice</h2>
-                <p className="text-base text-muted">Apply what you learned with these exercises.</p>
+              <div className="rounded-2xl border border-line bg-surface p-4 sm:p-6">
+                <h2 className="mb-4 text-xl font-bold text-ink sm:text-2xl">✍️ Practice</h2>
+                <p className="text-sm text-muted sm:text-base">Apply what you learned with these exercises.</p>
               </div>
 
               {lesson.practice.map((q, qIdx) => (
-                <div key={qIdx} className="rounded-2xl border border-line bg-surface p-6">
-                  <p className="mb-4 font-semibold text-ink">
+                <div key={qIdx} className="rounded-2xl border border-line bg-surface p-4 sm:p-6">
+                  <p className="mb-4 text-sm font-semibold text-ink sm:text-base">
                     {qIdx + 1}. {q.q}
                   </p>
                   <div className="space-y-2">

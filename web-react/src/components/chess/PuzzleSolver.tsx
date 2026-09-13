@@ -25,6 +25,7 @@ export const PuzzleSolver: React.FC<PuzzleSolverProps> = ({
   const [status, setStatus] = useState<ChessStatus>('solving');
   const [feedback, setFeedback] = useState('');
   const [loading, setLoading] = useState(false);
+  const [boardVersion, setBoardVersion] = useState(0);
 
   // Reset when puzzle changes
   useEffect(() => {
@@ -39,9 +40,10 @@ export const PuzzleSolver: React.FC<PuzzleSolverProps> = ({
 
   // Handle move
   const handleMove = useCallback(
-    // @ts-ignore - newFen parameter kept for callback signature compatibility
     async (move: any, newFen: string) => {
       const newMoves = [...moves, move.san];
+      const newGame = new Chess(newFen);
+      setGame(newGame);
       setMoves(newMoves);
 
       // Check if move matches solution
@@ -54,6 +56,7 @@ export const PuzzleSolver: React.FC<PuzzleSolverProps> = ({
         setTimeout(() => {
           const resetGame = new Chess(puzzle.position?.fen || puzzle.positionId);
           setGame(resetGame);
+          setBoardVersion((version) => version + 1);
           setMoves([]);
           setStatus('solving');
           setFeedback('');
@@ -83,14 +86,14 @@ export const PuzzleSolver: React.FC<PuzzleSolverProps> = ({
         // Make opponent's response
         const opponentMove = puzzle.solution[newMoves.length];
         setTimeout(() => {
-          const gameCopy = new Chess(game.fen());
+          const gameCopy = new Chess(newFen);
           gameCopy.move(opponentMove);
           setGame(gameCopy);
           setMoves([...newMoves, opponentMove]);
         }, 500);
       }
     },
-    [moves, puzzle, game, startTime, hintsUsed, onComplete]
+    [moves, puzzle, startTime, hintsUsed, onComplete]
   );
 
   // Request hint
@@ -114,6 +117,7 @@ export const PuzzleSolver: React.FC<PuzzleSolverProps> = ({
   const resetPuzzle = useCallback(() => {
     const newGame = new Chess(puzzle.position?.fen || puzzle.positionId);
     setGame(newGame);
+    setBoardVersion((version) => version + 1);
     setMoves([]);
     setStatus('solving');
     setFeedback('');
@@ -164,6 +168,7 @@ export const PuzzleSolver: React.FC<PuzzleSolverProps> = ({
       {/* Chessboard */}
       <div className="puzzle-board">
         <ChessBoard
+          key={`${game.fen()}-${boardVersion}`}
           initialFen={game.fen()}
           onMove={handleMove}
           disabled={status !== 'solving'}
