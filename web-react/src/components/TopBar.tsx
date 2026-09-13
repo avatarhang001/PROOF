@@ -39,7 +39,7 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [updateUser, user?.id]);
+  }, [user?.id]);
 
   const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
