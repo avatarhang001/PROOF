@@ -4,6 +4,7 @@ import { Reveal } from '../components/Reveal';
 import { useAuth } from '../context/AuthContext';
 import { WalletService } from '../services/wallet.service';
 import { api } from '../lib/api';
+import { pathsService } from '../services/paths.service';
 
 const POPULAR_TAGS = [
   "Code",
@@ -24,6 +25,23 @@ const MORE_TAGS = [
   "Writing",
   "Music",
 ] as const;
+
+const SKILL_DOMAINS: Record<string, string> = {
+  Code: 'web-development',
+  Design: 'ui-design',
+  AI: 'ai',
+  Business: 'business',
+  Marketing: 'marketing',
+  DeFi: 'nimiq-blockchain',
+  Languages: 'languages',
+  'Data Science': 'data-analysis',
+  'Web Development': 'web-development',
+  Python: 'python',
+  'No-code': 'web-development',
+  'Data Analysis': 'data-analysis',
+  Writing: 'writing',
+  'Music': 'music-production',
+};
 
 const LEVELS = [
   { value: "new", label: "New to it" },
@@ -125,8 +143,8 @@ export function OnboardingPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
-  const [tags, setTags] = useState<string[]>(["Code", "Design", "AI"]);
-  const [more, setMore] = useState<string[]>(["Python"]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [more, setMore] = useState<string[]>([]);
   const [showMore, setShowMore] = useState(false);
   const [level, setLevel] = useState<string>(LEVELS[0].value);
   const [time, setTime] = useState<string>(TIMES[1].value);
@@ -135,7 +153,7 @@ export function OnboardingPage() {
   const [error, setError] = useState<string | null>(null);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showUsernameModal, setShowUsernameModal] = useState(false);
-  const [selectedWalletType, setSelectedWalletType] = useState<'demo' | 'hub' | 'nimiqpay' | null>(null);
+  const [showSkillModal, setShowSkillModal] = useState(false);
   const [username, setUsername] = useState("");
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(
@@ -168,10 +186,35 @@ export function OnboardingPage() {
     );
   };
 
-  const handleWalletSelect = (walletType: 'demo' | 'hub' | 'nimiqpay') => {
-    setSelectedWalletType(walletType);
-    setShowWalletModal(false);
-    setShowUsernameModal(true);
+  const connectWallet = async (walletType: 'demo' | 'hub' | 'nimiqpay') => {
+    if (walletType === 'demo') return WalletService.connectDemo(null);
+    if (walletType === 'nimiqpay') return WalletService.connectNimiqPay(null);
+    return WalletService.connectNimiqHub(null);
+  };
+
+  const handleWalletSelect = async (walletType: 'demo' | 'hub' | 'nimiqpay') => {
+    setConnecting(true);
+    setError(null);
+    try {
+      await connectWallet(walletType);
+      setShowWalletModal(false);
+      setShowUsernameModal(true);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to connect wallet. Please try again.';
+      setError(errorMessage.includes('USER_REJECTED')
+        ? 'Connection cancelled. Please try again when ready.'
+        : errorMessage.includes('NIMIQ_PAY_UNAVAILABLE')
+        ? 'Nimiq Pay is only available in the mobile app. Use Nimiq Hub or Demo Wallet instead.'
+        : errorMessage.includes('HUB_TIMEOUT')
+        ? 'Connection timed out. Please try again.'
+        : errorMessage.includes('NO_ACCOUNTS')
+        ? 'No wallet accounts found. Please create an account in your wallet first.'
+        : errorMessage.includes('NO_ADDRESS_SELECTED')
+        ? 'No address selected. Please try again and select an address.'
+        : errorMessage);
+    } finally {
+      setConnecting(false);
+    }
   };
 
   const handleUsernameSubmit = async (e: React.FormEvent) => {
@@ -197,15 +240,25 @@ export function OnboardingPage() {
     
     setUsernameError(null);
     setShowUsernameModal(false);
-    await handleConnectWallet(selectedWalletType!, trimmedUsername || null);
+    setShowSkillModal(true);
   };
 
   const handleSkipUsername = async () => {
     setShowUsernameModal(false);
-    await handleConnectWallet(selectedWalletType!, null);
+    setUsername("");
+    setShowSkillModal(true);
   };
 
-  const handleConnectWallet = async (walletType: 'demo' | 'hub' | 'nimiqpay', customUsername: string | null) => {
+  const handleSkillSubmit = async () => {
+    if (!query.trim() && tags.length === 0 && more.length === 0) {
+      setError('Choose at least one skill or enter what you want to learn.');
+      return;
+    }
+    setShowSkillModal(false);
+    await finishOnboarding(username.trim() || null);
+  };
+
+  const finishOnboarding = async (customUsername: string | null) => {
     try {
       setConnecting(true);
       setError(null);
@@ -218,28 +271,19 @@ export function OnboardingPage() {
         interests: [...tags, ...more],
       };
       
-      // Connect wallet with username (works for all wallet types)
-      // The wallet service handles authentication and creates the session
-      let walletResult;
-      
-      if (walletType === 'demo') {
-        walletResult = await WalletService.connectDemo(customUsername);
-      } else if (walletType === 'nimiqpay') {
-        walletResult = await WalletService.connectNimiqPay(customUsername);
-      } else {
-        walletResult = await WalletService.connectNimiqHub(customUsername);
-      }
-      
-      console.log('Wallet connected:', walletResult);
-      
-      // After authentication, update user preferences
-      try {
-        await api.patch('/api/me', { prefs: onboardingData });
-        console.log('Preferences saved');
-      } catch (prefErr) {
-        console.warn('Could not save preferences:', prefErr);
-        // Continue anyway - user can set preferences later
-      }
+      if (customUsername) await api.patch('/api/me', { username: customUsername });
+      await api.patch('/api/me', { prefs: onboardingData });
+
+      const selectedSkill = [...tags, ...more][0];
+      const goal = query.trim() || (selectedSkill ? `Learn ${selectedSkill}` : 'Learn new skills');
+      const domain = selectedSkill ? SKILL_DOMAINS[selectedSkill] : undefined;
+      const pathLevel = level === 'advanced' ? 'advanced' : level === 'intermediate' ? 'intermediate' : 'beginner';
+      await pathsService.createPath({
+        goal,
+        domain,
+        level: pathLevel,
+        minutesPerDay: parseInt(time),
+      });
       
       // Mark onboarding as completed
       localStorage.setItem('onboarding_completed', 'true');
@@ -252,17 +296,7 @@ export function OnboardingPage() {
       const errorMessage = err.message || 'Failed to connect wallet. Please try again.';
       
       // User-friendly error messages
-      if (errorMessage.includes('USER_REJECTED')) {
-        setError('Connection cancelled. Please try again when ready.');
-      } else if (errorMessage.includes('NIMIQ_PAY_UNAVAILABLE')) {
-        setError('Nimiq Pay is only available in the mobile app. Use Nimiq Hub or Demo Wallet instead.');
-      } else if (errorMessage.includes('HUB_TIMEOUT')) {
-        setError('Connection timed out. Please try again.');
-      } else if (errorMessage.includes('NO_ACCOUNTS')) {
-        setError('No wallet accounts found. Please create an account in your wallet first.');
-      } else if (errorMessage.includes('NO_ADDRESS_SELECTED')) {
-        setError('No address selected. Please try again and select an address.');
-      } else if (errorMessage.includes('USERNAME_TAKEN')) {
+      if (errorMessage.includes('USERNAME_TAKEN') || errorMessage.includes('BAD_USERNAME')) {
         setError('Username already taken. Please try a different one.');
         setShowUsernameModal(true); // Re-show username modal
       } else if (errorMessage.includes('INVALID_USERNAME')) {
@@ -270,10 +304,8 @@ export function OnboardingPage() {
         setShowUsernameModal(true);
       } else {
         setError(errorMessage);
+        setShowSkillModal(true);
       }
-      
-      // Reset state for retry
-      setShowWalletModal(true);
     } finally {
       setConnecting(false);
     }
@@ -429,61 +461,6 @@ export function OnboardingPage() {
                 />
               </div>
             </label>
-
-            <div className="mt-5">
-              <p className="text-xs font-bold text-ink">Popular</p>
-              <div className="mt-2.5 flex flex-wrap gap-2">
-                {POPULAR_TAGS.map((label) => (
-                  <Pill
-                    key={label}
-                    label={label}
-                    active={tags.includes(label)}
-                    onClick={() => toggle(label, "tags")}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={() => setShowMore((value) => !value)}
-                aria-expanded={showMore}
-                className={`group inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-all duration-200 ${
-                  showMore
-                    ? 'border-brand bg-brand-soft text-brand'
-                    : 'border-line bg-surface text-muted hover:border-brand/35 hover:text-ink'
-                }`}
-              >
-                More
-                <svg
-                  className={`h-3.5 w-3.5 transition-transform duration-300 ${showMore ? 'rotate-45' : 'rotate-0'}`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="4" y="4" width="16" height="16" rx="3" />
-                  <path d="M12 9v6" />
-                  <path d="M9 12h6" />
-                </svg>
-              </button>
-
-              {showMore && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {MORE_TAGS.map((label) => (
-                    <Pill
-                      key={label}
-                      label={label}
-                      active={more.includes(label)}
-                      onClick={() => toggle(label, "more")}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
 
             <div className="mt-5 grid gap-3.5">
               <FieldSelect
@@ -735,6 +712,56 @@ export function OnboardingPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </Reveal>
+        </div>
+      )}
+
+      {/* Skill Selection Modal */}
+      {showSkillModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <Reveal>
+            <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-6 shadow-2xl">
+              <h3 className="text-xl font-bold text-ink">Choose your first learning path</h3>
+              <p className="mt-2 text-sm text-muted">Your wallet and username are ready. Pick one or more skills and we will create your first path.</p>
+
+              <div className="mt-6">
+                <p className="text-xs font-bold text-ink">Popular</p>
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  {POPULAR_TAGS.map((label) => (
+                    <Pill key={label} label={label} active={tags.includes(label)} onClick={() => toggle(label, 'tags')} />
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-5">
+                <button
+                  type="button"
+                  onClick={() => setShowMore((value) => !value)}
+                  aria-expanded={showMore}
+                  className="text-sm font-semibold text-brand hover:text-brand-deep"
+                >
+                  {showMore ? 'Hide more skills' : 'Show more skills'}
+                </button>
+                {showMore && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {MORE_TAGS.map((label) => (
+                      <Pill key={label} label={label} active={more.includes(label)} onClick={() => toggle(label, 'more')} />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {error && <div className="mt-4 rounded-lg bg-bad-soft p-3 text-sm text-bad">{error}</div>}
+
+              <button
+                type="button"
+                onClick={handleSkillSubmit}
+                disabled={connecting || (!query.trim() && tags.length === 0 && more.length === 0)}
+                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-brand to-brand-deep text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:from-brand-hover hover:to-brand disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {connecting ? 'Creating your path...' : 'Create my learning path'}
+              </button>
             </div>
           </Reveal>
         </div>
