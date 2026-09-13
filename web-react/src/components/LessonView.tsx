@@ -73,9 +73,9 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
       const currentIndex = studies.findIndex(({ day, item }: { day: any; item: any }) =>
         day.index === Number(dayIndex) && item.topic === topic
       );
-      if (currentIndex > 0 && !studies[currentIndex].item.practiceDone) {
+      if (currentIndex > 0) {
         const unfinished = studies.slice(0, currentIndex).find(({ item }: { item: any }) => !item.practiceDone);
-        setLockedByLesson(unfinished?.item.title || 'the previous lesson');
+        if (unfinished) setLockedByLesson(unfinished.item.title || 'the previous lesson');
       }
     } catch (accessError) {
       // Normal navigation is locked in the path view. A transient progress
