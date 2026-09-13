@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { CloseIcon, LeafIcon, ProofLogo } from "./Icons";
+import { CloseIcon, LeafIcon } from "./Icons";
 import { useNavItems } from "@/hooks/useNavItems";
 
 type Common = {
@@ -14,7 +14,7 @@ function SidebarBody({ isDark, onToggleTheme }: Common) {
   return (
     <>
       <div className="flex items-center gap-2.5 px-6 pt-7 pb-6">
-        <ProofLogo className="h-7 w-7 shrink-0 drop-shadow-[0_4px_10px_rgba(245,158,11,0.35)]" />
+        <img src="/proof-mark.svg" alt="" className="h-8 w-8 shrink-0 object-contain" />
         <span className="font-display text-[16.5px] font-extrabold tracking-[0.2em] text-ink">PROOF</span>
       </div>
 

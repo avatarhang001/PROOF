@@ -139,6 +139,24 @@ function FieldSelect({
   );
 }
 
+function WelcomeSplash() {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[var(--app)] px-6">
+      <div className="pointer-events-none absolute inset-0 opacity-70 [background:radial-gradient(circle_at_50%_42%,var(--brand-soft),transparent_38%)]" />
+      <div className="relative flex flex-col items-center text-center animate-[welcome-in_700ms_cubic-bezier(0.22,1,0.36,1)_both]">
+        <div className="relative grid h-24 w-24 place-items-center rounded-[28px] bg-surface shadow-[0_18px_55px_rgba(35,173,153,0.22)] ring-1 ring-brand/20 animate-[welcome-mark_1200ms_ease-out_both]">
+          <img src="/proof-mark.svg" alt="" className="h-16 w-16 object-contain" />
+        </div>
+        <p className="mt-7 font-display text-3xl font-extrabold tracking-tight text-ink">Welcome to PROOF</p>
+        <p className="mt-2 text-sm text-muted">Your learning path is ready.</p>
+        <div className="mt-7 h-1 w-24 overflow-hidden rounded-full bg-brand-soft">
+          <div className="h-full w-1/2 rounded-full bg-brand animate-[welcome-progress_1100ms_ease-in-out_both]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function OnboardingPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -178,7 +196,7 @@ export function OnboardingPage() {
   }, [isDark]);
 
   useEffect(() => {
-    if (!showWelcome) return;
+    if (!showWelcome || authLoading || user) return;
     try {
       sessionStorage.removeItem('proof_welcome_pending');
     } catch {
@@ -186,9 +204,17 @@ export function OnboardingPage() {
     }
     const timer = window.setTimeout(() => setShowWelcome(false), 1400);
     return () => window.clearTimeout(timer);
-  }, [showWelcome]);
+  }, [authLoading, showWelcome, user]);
 
   const toggleTheme = useCallback(() => setIsDark((value) => !value), []);
+
+  if (showWelcome) {
+    if (user && !authLoading) {
+      const from = (location.state as any)?.from?.pathname || '/home';
+      navigate(from, { replace: true });
+    }
+    return <WelcomeSplash />;
+  }
 
   // If already authenticated, redirect to intended destination or home
   if (user && !authLoading) {
@@ -799,21 +825,6 @@ export function OnboardingPage() {
         </div>
       )}
 
-      {showWelcome && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[var(--app)] px-6">
-          <div className="pointer-events-none absolute inset-0 opacity-70 [background:radial-gradient(circle_at_50%_42%,var(--brand-soft),transparent_38%)]" />
-          <div className="relative flex flex-col items-center text-center animate-[welcome-in_700ms_cubic-bezier(0.22,1,0.36,1)_both]">
-            <div className="relative grid h-24 w-24 place-items-center rounded-[28px] bg-surface shadow-[0_18px_55px_rgba(35,173,153,0.22)] ring-1 ring-brand/20 animate-[welcome-mark_1200ms_ease-out_both]">
-              <img src="/proof-mark.svg" alt="" className="h-16 w-16 object-contain" />
-            </div>
-            <p className="mt-7 font-display text-3xl font-extrabold tracking-tight text-ink">Welcome to PROOF</p>
-            <p className="mt-2 text-sm text-muted">Your learning path is ready.</p>
-            <div className="mt-7 h-1 w-24 overflow-hidden rounded-full bg-brand-soft">
-              <div className="h-full w-1/2 rounded-full bg-brand animate-[welcome-progress_1100ms_ease-in-out_both]" />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
