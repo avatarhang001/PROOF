@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Chess } from 'chess.js';
 import { ChessBoard } from './ChessBoard';
 import { analysisApi } from '../../services/chess';
@@ -12,6 +12,26 @@ export type ChessProofPayload = {
 };
 
 type MoveRecord = ChessProofPayload['positions'][number];
+
+function playEngineMove(fen: string, notation: string | null) {
+  if (!notation) return null;
+
+  try {
+    const game = new Chess(fen);
+    const move = game.move(notation, { strict: true });
+    return move ? { fen: game.fen(), san: move.san } : null;
+  } catch {
+    try {
+      const game = new Chess(fen);
+      const uci = notation.trim().match(/^([a-h][1-8])([a-h][1-8])([qrbn])?$/i);
+      if (!uci) return null;
+      const move = game.move({ from: uci[1], to: uci[2], promotion: uci[3]?.toLowerCase() as 'q' | 'r' | 'b' | 'n' | undefined });
+      return move ? { fen: game.fen(), san: move.san } : null;
+    } catch {
+      return null;
+    }
+  }
+}
 
 export function ChessProofBoard({ challenge, disabled = false, onChange }: {
   challenge: Challenge;
@@ -36,6 +56,8 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
   const [analysis, setAnalysis] = useState<PositionAnalysisResponse | null>(null);
   const [analysing, setAnalysing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const analysisRequest = useRef(0);
+  const autoMoveKey = useRef<string | null>(null);
   const active = positions[activeIndex] || positions[0];
   const activeRecord = records.find((record) => record.positionKey === activeIndex);
   const boardStatus = useMemo(() => {
@@ -54,23 +76,47 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
     onChange({ positions: records.filter((record) => record.moves.length) });
   }, [records, onChange]);
 
+  const analyse = async (fen: string, letAiMove = false) => {
+    const requestId = ++analysisRequest.current;
+    try {
+      setAnalysing(true);
+      setAnalysisError(null);
+      const nextAnalysis = await analysisApi.analyzePosition({ fen, depth: 15 });
+      if (requestId === analysisRequest.current) {
+        setAnalysis(nextAnalysis);
+        if (letAiMove && autoMoveKey.current !== `${activeIndex}-${boardVersion}`) {
+          const engineMove = playEngineMove(fen, nextAnalysis.evaluation.bestMove);
+          autoMoveKey.current = `${activeIndex}-${boardVersion}`;
+          if (engineMove) {
+            setCurrentFen(engineMove.fen);
+            setRecords((current) => {
+              const prior = current.find((record) => record.positionKey === activeIndex);
+              const next = { positionKey: activeIndex, initialFen: active.fen, moves: [...(prior?.moves || []), engineMove.san] };
+              return [...current.filter((record) => record.positionKey !== activeIndex), next];
+            });
+            setAnalysis(null);
+            void analyse(engineMove.fen);
+          }
+        }
+      }
+    } catch (error) {
+      if (requestId === analysisRequest.current) {
+        setAnalysisError(error instanceof Error ? error.message : 'AI analysis is unavailable right now.');
+      }
+    } finally {
+      if (requestId === analysisRequest.current) {
+        setAnalysing(false);
+      }
+    }
+  };
+
   useEffect(() => {
     setAnalysis(null);
     setAnalysisError(null);
     setCurrentFen(active.fen);
+    autoMoveKey.current = null;
+    void analyse(active.fen, true);
   }, [active.fen, activeIndex, boardVersion]);
-
-  const analyse = async (fen: string) => {
-    try {
-      setAnalysing(true);
-      setAnalysisError(null);
-      setAnalysis(await analysisApi.analyzePosition({ fen, depth: 15 }));
-    } catch (error) {
-      setAnalysisError(error instanceof Error ? error.message : 'AI analysis is unavailable right now.');
-    } finally {
-      setAnalysing(false);
-    }
-  };
 
   const resetLine = () => {
     setRecords((current) => current.filter((record) => record.positionKey !== activeIndex));
@@ -88,8 +134,8 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand">Interactive FEN board</p>
-            <h2 className="mt-1 text-lg font-bold text-ink">Play the line. Let the AI analyse it.</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">Make legal moves directly on the board. Each move is checked from its FEN and sent to the analysis coach.</p>
+            <h2 className="mt-1 text-lg font-bold text-ink">Watch the AI play the position.</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">The board is controlled by the AI. It chooses a legal move, plays it, and then explains the resulting position.</p>
           </div>
           <span className="rounded-full border border-brand/20 bg-brand-soft px-3 py-1 text-xs font-semibold text-brand">
             {records.length}/{positions.length} line{positions.length === 1 ? '' : 's'} recorded
@@ -118,9 +164,9 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
       <div className="grid gap-5 p-5 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
         <div className="min-w-0">
           <ChessBoard
-            key={`${active.fen}-${boardVersion}`}
-            initialFen={active.fen}
-            disabled={disabled}
+            key={`${currentFen || active.fen}-${boardVersion}`}
+            initialFen={currentFen || active.fen}
+            disabled
             onMove={(move, finalFen) => {
               setRecords((current) => {
                 const prior = current.find((record) => record.positionKey === activeIndex);
@@ -128,6 +174,7 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
                 return [...current.filter((record) => record.positionKey !== activeIndex), next];
               });
               setCurrentFen(finalFen);
+              setAnalysis(null);
               void analyse(finalFen);
             }}
           />
@@ -149,7 +196,7 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
               <p className="text-xs font-bold uppercase tracking-wide text-muted">Recorded line</p>
               <button type="button" onClick={resetLine} disabled={disabled || !activeRecord} className="text-xs font-semibold text-brand hover:text-brand-deep disabled:cursor-not-allowed disabled:opacity-40">Reset line</button>
             </div>
-            <p className="mt-2 min-h-5 break-words font-mono text-sm text-ink">{activeRecord?.moves.length ? activeRecord.moves.join('  ') : 'No moves yet — drag a piece or click a source and destination square.'}</p>
+              <p className="mt-2 min-h-5 break-words font-mono text-sm text-ink">{activeRecord?.moves.length ? activeRecord.moves.join('  ') : 'The AI is preparing its legal move…'}</p>
           </div>
 
           <div className="rounded-xl border border-brand/20 bg-brand-soft/50 p-4">
@@ -162,7 +209,14 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
                 {analysing ? 'Analysing…' : 'Analyse position'}
               </button>
             </div>
-            {analysis && <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+            {analysing && (
+              <div className="mt-3 flex items-center gap-2 rounded-lg border border-brand/15 bg-surface px-3 py-2 text-sm text-brand" role="status">
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+                <span>AI is reviewing {currentFen ? 'your latest move' : 'the position'}…</span>
+              </div>
+            )}
+            {analysis && !analysing && <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+              <p className="sm:col-span-2 font-semibold text-brand">AI response to the latest position</p>
               <p><span className="text-muted">Evaluation </span><span className="font-semibold text-ink">{scoreLabel}</span></p>
               <p><span className="text-muted">Best move </span><span className="font-semibold text-ink">{analysis.evaluation.bestMove || 'No legal move'}</span></p>
               {analysis.hints.tactics.length > 0 && <p className="sm:col-span-2 text-muted">{analysis.hints.tactics.join(' · ')}</p>}
@@ -171,7 +225,7 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
             {analysisError && <p className="mt-3 text-xs text-bad">{analysisError}</p>}
           </div>
 
-          <p className="break-all rounded-lg border border-line bg-surface px-3 py-2 font-mono text-[11px] leading-relaxed text-muted">FEN: {active.fen}</p>
+          <p className="break-all rounded-lg border border-line bg-surface px-3 py-2 font-mono text-[11px] leading-relaxed text-muted">FEN: {currentFen || active.fen}</p>
         </div>
       </div>
     </section>
