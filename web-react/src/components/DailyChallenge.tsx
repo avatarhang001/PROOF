@@ -86,7 +86,7 @@ export function DailyChallenge() {
         {/* CTA Button */}
         <Link
           to={`/prove/challenge/${challenge.id}`}
-          className="w-full rounded-xl bg-white py-4 font-display text-[15px] font-extrabold text-[#1F2763] shadow-[0_8px_24px_-6px_rgba(255,255,255,0.3)] transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          className="flex min-h-12 w-full items-center justify-center rounded-xl bg-white px-4 py-3 text-center font-display text-[15px] font-extrabold text-[#1F2763] shadow-[0_8px_24px_-6px_rgba(255,255,255,0.3)] transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
         >
           Start Challenge
         </Link>
