@@ -225,6 +225,7 @@ route('POST', '/api/auth/verify', async (ctx) => {
   let user = isNimiqMode && looksLikeNimiqAddress(authenticatedAddress)
     ? await users.findByWallet(authenticatedAddress)
     : await users.findByPublicKey(body.publicKey);
+  const isNewUser = !user;
   
   // Extract and validate custom username if provided
   let customUsername = null;
@@ -254,7 +255,7 @@ route('POST', '/api/auth/verify', async (ctx) => {
 
   const token = await auth.createSession(user.id);
 
-  json(res, 200, { user: await publicMe(user), demo: mode === 'demo' }, { 'set-cookie': sessionCookie(token, undefined, ctx.req) });
+  json(res, 200, { user: await publicMe(user), demo: mode === 'demo', isNewUser }, { 'set-cookie': sessionCookie(token, undefined, ctx.req) });
 });
 
 route('POST', '/api/wallet/demo', (ctx) => {

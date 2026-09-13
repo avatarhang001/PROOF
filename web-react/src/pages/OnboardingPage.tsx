@@ -156,6 +156,13 @@ export function OnboardingPage() {
   const [showSkillModal, setShowSkillModal] = useState(false);
   const [username, setUsername] = useState("");
   const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    try {
+      return sessionStorage.getItem('proof_welcome_pending') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [isDark, setIsDark] = useState(
     () => typeof document !== "undefined" && document.documentElement.classList.contains("dark"),
   );
@@ -169,6 +176,17 @@ export function OnboardingPage() {
       /* storage unavailable — theme still applies for this session */
     }
   }, [isDark]);
+
+  useEffect(() => {
+    if (!showWelcome) return;
+    try {
+      sessionStorage.removeItem('proof_welcome_pending');
+    } catch {
+      // Welcome animation still works when session storage is unavailable.
+    }
+    const timer = window.setTimeout(() => setShowWelcome(false), 1400);
+    return () => window.clearTimeout(timer);
+  }, [showWelcome]);
 
   const toggleTheme = useCallback(() => setIsDark((value) => !value), []);
 
@@ -196,9 +214,13 @@ export function OnboardingPage() {
     setConnecting(true);
     setError(null);
     try {
-      await connectWallet(walletType);
+      const walletResult = await connectWallet(walletType);
       setShowWalletModal(false);
-      setShowUsernameModal(true);
+      if (walletResult.isNewUser) {
+        setShowUsernameModal(true);
+      } else {
+        setShowSkillModal(true);
+      }
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to connect wallet. Please try again.';
       setError(errorMessage.includes('USER_REJECTED')
@@ -250,10 +272,6 @@ export function OnboardingPage() {
   };
 
   const handleSkillSubmit = async () => {
-    if (!query.trim() && tags.length === 0 && more.length === 0) {
-      setError('Choose at least one skill or enter what you want to learn.');
-      return;
-    }
     setShowSkillModal(false);
     await finishOnboarding(username.trim() || null);
   };
@@ -288,9 +306,13 @@ export function OnboardingPage() {
       // Mark onboarding as completed
       localStorage.setItem('onboarding_completed', 'true');
       
-      // Refresh the auth context to load the authenticated user
-      // This will trigger a re-render and redirect via the auth check
-      window.location.reload();
+      try {
+        sessionStorage.setItem('proof_welcome_pending', 'true');
+      } catch {
+        // The transition can still cover the reload without session storage.
+      }
+      setShowWelcome(true);
+      window.setTimeout(() => window.location.reload(), 1250);
     } catch (err: any) {
       console.error('Failed to connect wallet:', err);
       const errorMessage = err.message || 'Failed to connect wallet. Please try again.';
@@ -332,9 +354,11 @@ export function OnboardingPage() {
       {/* Header */}
       <header className="relative flex items-center justify-between px-6 pt-7 sm:px-10 sm:pt-8 lg:px-14">
         <div className="group inline-flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-gold to-gold/80 text-white shadow-lg">
-            <span className="text-sm font-bold">P</span>
-          </div>
+          <img
+            src="/proof-mark.svg"
+            alt=""
+            className="h-8 w-8 object-contain drop-shadow-[0_4px_10px_rgba(245,158,11,0.28)]"
+          />
           <span className="font-display text-base font-extrabold tracking-[0.24em] text-ink">PROOF</span>
         </div>
 
@@ -757,13 +781,37 @@ export function OnboardingPage() {
               <button
                 type="button"
                 onClick={handleSkillSubmit}
-                disabled={connecting || (!query.trim() && tags.length === 0 && more.length === 0)}
+                disabled={connecting}
                 className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-brand to-brand-deep text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:from-brand-hover hover:to-brand disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {connecting ? 'Creating your path...' : 'Create my learning path'}
               </button>
+              <button
+                type="button"
+                onClick={handleSkillSubmit}
+                disabled={connecting}
+                className="mt-3 w-full text-center text-sm font-semibold text-muted transition-colors hover:text-ink disabled:opacity-60"
+              >
+                Skip for now
+              </button>
             </div>
           </Reveal>
+        </div>
+      )}
+
+      {showWelcome && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[var(--app)] px-6">
+          <div className="pointer-events-none absolute inset-0 opacity-70 [background:radial-gradient(circle_at_50%_42%,var(--brand-soft),transparent_38%)]" />
+          <div className="relative flex flex-col items-center text-center animate-[welcome-in_700ms_cubic-bezier(0.22,1,0.36,1)_both]">
+            <div className="relative grid h-24 w-24 place-items-center rounded-[28px] bg-surface shadow-[0_18px_55px_rgba(35,173,153,0.22)] ring-1 ring-brand/20 animate-[welcome-mark_1200ms_ease-out_both]">
+              <img src="/proof-mark.svg" alt="" className="h-16 w-16 object-contain" />
+            </div>
+            <p className="mt-7 font-display text-3xl font-extrabold tracking-tight text-ink">Welcome to PROOF</p>
+            <p className="mt-2 text-sm text-muted">Your learning path is ready.</p>
+            <div className="mt-7 h-1 w-24 overflow-hidden rounded-full bg-brand-soft">
+              <div className="h-full w-1/2 rounded-full bg-brand animate-[welcome-progress_1100ms_ease-in-out_both]" />
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -296,7 +296,7 @@ class WalletServiceClass {
       : null;
     if (!address) throw new Error('NO_ACCOUNTS');
     
-    await this.authenticate(
+    const authResult = await this.authenticate(
       'nimiqpay',
       {
         address,
@@ -319,7 +319,7 @@ class WalletServiceClass {
     state.address = address;
     state.nimiq = nimiq;
     this.persist();
-    return { mode: 'nimiqpay' as const, address };
+    return { mode: 'nimiqpay' as const, address, isNewUser: Boolean(authResult?.isNewUser) };
   }
 
   async connectDemo(username: string | null = null) {
@@ -330,7 +330,7 @@ class WalletServiceClass {
       state.demoKey = demo;
     }
     
-    await this.authenticate(
+    const authResult = await this.authenticate(
       'demo',
       {
         publicKey: demo.publicKey,
@@ -348,7 +348,7 @@ class WalletServiceClass {
     state.mode = 'demo';
     state.address = null;
     this.persist();
-    return { mode: 'demo' as const, address: null };
+    return { mode: 'demo' as const, address: null, isNewUser: Boolean(authResult?.isNewUser) };
   }
 
   async connectNimiqHub(username: string | null = null) {
@@ -400,7 +400,7 @@ class WalletServiceClass {
       state.sessionUser = res.user;
       this.persist();
       console.debug('[wallet] authenticated');
-      return { mode: 'hub' as const, address };
+      return { mode: 'hub' as const, address, isNewUser: Boolean(res?.isNewUser) };
     } catch (err) {
       console.warn('wallet: connectNimiqHub failed:', err);
       const code = walletErrorCode(err);
