@@ -353,7 +353,7 @@ route('PATCH', '/api/me', async (ctx) => {
     p.goal = String(p.goal || '').slice(0, 240);
     p.level = String(p.level || '').slice(0, 20);
     if (p.theme !== undefined && !['light', 'dark', 'system'].includes(p.theme)) delete p.theme;
-    if (p.language !== undefined && !['en', 'es', 'fr', 'pt'].includes(p.language)) delete p.language;
+    if (p.language !== undefined && !['en', 'es', 'fr', 'pt', 'de', 'zh'].includes(p.language)) delete p.language;
     patch.prefs = p;
   }
   await users.update(user, patch);

@@ -24,6 +24,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Save to localStorage whenever language changes
     localStorage.setItem('proof-language', language);
+    document.documentElement.lang = language;
   }, [language]);
 
   const setLanguage = (lang: Language) => {

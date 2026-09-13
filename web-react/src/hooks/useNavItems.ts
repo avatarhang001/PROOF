@@ -2,9 +2,11 @@ import { useMemo, useEffect, useState } from 'react';
 import { NAV_ITEMS } from '@/data';
 import { reviewsService } from '@/services/reviews.service';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export function useNavItems() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [reviewsDue, setReviewsDue] = useState(0);
 
   useEffect(() => {
@@ -32,18 +34,33 @@ export function useNavItems() {
   };
 
   const navItems = useMemo(() => {
+    const labels: Record<string, string> = {
+      home: t.nav.home,
+      learn: t.nav.learn,
+      review: t.nav.reviews,
+      prove: t.nav.prove,
+      work: t.nav.work,
+      profile: t.nav.profile,
+      glossary: t.nav.glossary,
+      socratic: t.nav.socratic,
+      notifications: t.nav.notifications,
+      settings: t.nav.settings,
+      teach: 'Teach',
+      leaderboard: 'Leaderboard',
+    };
     return NAV_ITEMS.map((item) => {
+      const localized = { ...item, label: labels[item.id] || item.label };
       // Update review badge
       if (item.id === 'review') {
-        return { ...item, badge: reviewsDue > 0 ? reviewsDue : undefined };
+        return { ...localized, badge: reviewsDue > 0 ? reviewsDue : undefined };
       }
       // Update notifications badge from user data
       if (item.id === 'notifications') {
-        return { ...item, badge: user?.unreadNotifications || undefined };
+        return { ...localized, badge: user?.unreadNotifications || undefined };
       }
-      return item;
+      return localized;
     });
-  }, [reviewsDue, user?.unreadNotifications]);
+  }, [reviewsDue, t, user?.unreadNotifications]);
 
   return navItems;
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Reveal } from './Reveal';
 import { pathsService } from '../services/paths.service';
+import { useLanguage } from '../context/LanguageContext';
 import { TutorModal } from './TutorModal';
 import { ChatBubbleLeftRightIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { ChessBoard } from './chess/ChessBoard';
@@ -37,6 +38,7 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const dayIndex = searchParams.get('day') || '1';
+  const { language } = useLanguage();
 
   const [lesson, setLesson] = useState<LessonData | null>(null);
   const [loading, setLoading] = useState(true); // Start true, will be set false when data loads
@@ -60,7 +62,7 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
     setLockedByLesson(null);
     loadLesson();
     void checkLessonAccess();
-  }, [skill, topic]); // Add skill to dependencies
+  }, [language, skill, topic]); // Reload lesson content when the locale changes.
 
   const checkLessonAccess = async () => {
     try {
@@ -90,7 +92,7 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
     console.log('[LessonView] Loading lesson:', skill, topic);
     try {
       // Check cache first
-      const cacheKey = `lesson_${skill}_${topic}`;
+      const cacheKey = `lesson_${language}_${skill}_${topic}`;
       const cached = sessionStorage.getItem(cacheKey);
       
       if (cached) {
@@ -132,7 +134,7 @@ export function LessonView({ pathId, skill, topic }: LessonViewProps) {
   const fetchAndCacheLesson = async (cacheKey: string, updateUI: boolean = true) => {
     console.log('[LessonView] Fetching:', cacheKey, 'updateUI:', updateUI);
     try {
-      const response = await fetch(`/api/lesson/${skill}/${topic}`, {
+      const response = await fetch(`/api/lesson/${skill}/${topic}?lang=${language}`, {
         credentials: 'include',
       });
 
