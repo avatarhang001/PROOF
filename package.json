@@ -14,7 +14,8 @@
     "test": "node --test tests/*.test.js",
     "smoke": "node tests/smoke.js",
     "typecheck": "tsc --noEmit",
-    "seed:reset": "node -e \"import('./server/store.js').then(async m=>{const s=new m.Store({dataDir:'data'});await s.reset();console.log('store reset')})\""
+    "seed:reset": "node -e \"import('./server/store.js').then(async m=>{const s=new m.Store({dataDir:'data'});await s.reset();console.log('store reset')})\"",
+    "reset:supabase-users": "node --env-file=.env scripts/reset-supabase-users.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

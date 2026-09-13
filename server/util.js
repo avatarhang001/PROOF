@@ -160,10 +160,16 @@ export function validate(value, schema, path = '$') {
 export const looksLikeNimiqAddress = (s) =>
   typeof s === 'string' && /^NQ[0-9A-Z ]{30,60}$/.test(s.replace(/\s+/g, ' ').trim());
 
+export const normalizeNimiqAddress = (s) =>
+  typeof s === 'string' ? s.replace(/\s+/g, '').toUpperCase() : '';
+
 /** Derive the checksummed user-friendly basic-account address from an Ed25519 key. */
 export function nimiqAddressFromPublicKey(pubHex) {
-  if (typeof pubHex !== 'string' || !/^[0-9a-f]{64}$/i.test(pubHex)) return null;
-  const digest = crypto.createHash('blake2b512').update(Buffer.from(pubHex, 'hex')).digest().subarray(0, 20);
+  const normalizedKey = typeof pubHex === 'string'
+    ? pubHex.replace(/^0x/i, '').replace(/\s+/g, '')
+    : '';
+  if (!/^[0-9a-f]{64}$/i.test(normalizedKey)) return null;
+  const digest = crypto.createHash('blake2b512').update(Buffer.from(normalizedKey, 'hex')).digest().subarray(0, 20);
   const alphabet = '0123456789ABCDEFGHJKLMNPQRSTUVXY';
   let n = BigInt('0x' + digest.toString('hex'));
   let plain = '';

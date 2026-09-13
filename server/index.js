@@ -19,7 +19,7 @@ import { MarketplaceService } from './services/marketplace.js';
 import { TeachingService } from './services/teaching.js';
 import { generateLearningPath, generateLesson, recommendNextSkill, tutorReply, detectDomain } from './ai/service.js';
 import { createCurriculumFromDocument, getUserDocumentCurricula, getDocumentCurriculum } from './services/document-curriculum.js';
-import { uid, now, toNim, escapeHtml, RateLimiter, looksLikeNimiqAddress, nimiqAddressFromPublicKey, validate, parseNumber, hmac } from './util.js';
+import { uid, now, toNim, escapeHtml, RateLimiter, looksLikeNimiqAddress, normalizeNimiqAddress, nimiqAddressFromPublicKey, validate, parseNumber, hmac } from './util.js';
 import * as stockfish from './ai/services/stockfish.js';
 import multer from 'multer';
 
@@ -194,10 +194,10 @@ route('POST', '/api/auth/verify', async (ctx) => {
   // For nimiqpay, validate that address matches the public key (basic account only)
   if (mode === 'nimiqpay') {
     const derivedAddress = nimiqAddressFromPublicKey(String(body?.publicKey || ''));
-    const providedAddress = String(body.address).replace(/\s+/g, ' ').trim();
-    const normalizedDerived = derivedAddress ? derivedAddress.replace(/\s+/g, ' ').trim() : null;
+    const providedAddress = normalizeNimiqAddress(body.address);
+    const normalizedDerived = derivedAddress ? normalizeNimiqAddress(derivedAddress) : null;
 
-    if (!looksLikeNimiqAddress(body.address) || !derivedAddress || normalizedDerived !== providedAddress) {
+    if (!looksLikeNimiqAddress(String(body.address || '').toUpperCase()) || !derivedAddress || normalizedDerived !== providedAddress) {
       throw httpError(401, 'ADDRESS_MISMATCH', 'Wallet address does not match the public key.');
     }
   } else if (mode === 'hub') {
