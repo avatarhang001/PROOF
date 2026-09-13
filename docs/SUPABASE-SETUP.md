@@ -47,6 +47,10 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...your_service_role_key
 
 # Change mode to supabase
 DB_MODE=supabase
+
+# Keep this value permanent across every Railway deployment/restart.
+# Changing it invalidates existing signed sessions.
+AUTH_SECRET=<long-random-secret>
 ```
 
 ## Step 4: Install Dependencies

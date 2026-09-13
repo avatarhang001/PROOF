@@ -221,8 +221,10 @@ route('POST', '/api/auth/verify', async (ctx) => {
   if (!(await auth.consumeNonce(String(body?.nonce || ''))))
     throw httpError(400, 'BAD_NONCE', 'This sign-in request expired. Try again.');
 
-  let user = null;
   const isNimiqMode = mode === 'nimiqpay' || mode === 'hub';
+  let user = isNimiqMode && looksLikeNimiqAddress(authenticatedAddress)
+    ? await users.findByWallet(authenticatedAddress)
+    : await users.findByPublicKey(body.publicKey);
   
   // Extract and validate custom username if provided
   let customUsername = null;
@@ -232,7 +234,7 @@ route('POST', '/api/auth/verify', async (ctx) => {
     if (username.length >= 3 && username.length <= 20 && /^[a-zA-Z0-9_]+$/.test(username)) {
       // Check if username is already taken
       const existing = await users.findByUsername(username);
-      if (!existing) {
+      if (!existing || (user && existing.id === user.id)) {
         customUsername = username;
       } else {
         throw httpError(409, 'USERNAME_TAKEN', 'This username is already taken. Please choose another.');
@@ -243,11 +245,9 @@ route('POST', '/api/auth/verify', async (ctx) => {
   }
   
   if (isNimiqMode && looksLikeNimiqAddress(authenticatedAddress)) {
-    user = await users.findByWallet(authenticatedAddress);
     if (!user) user = await users.createUser({ walletAddress: authenticatedAddress, walletMode: mode, username: customUsername });
     else await users.update(user, { walletAddress: authenticatedAddress, walletMode: mode, publicKey: body.publicKey });
   } else {
-    user = await users.findByPublicKey(body.publicKey);
     if (!user) user = await users.createUser({ walletMode: 'demo', username: customUsername });
     await users.update(user, { publicKey: body.publicKey, walletMode: 'demo' });
   }

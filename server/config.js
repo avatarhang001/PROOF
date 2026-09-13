@@ -78,6 +78,11 @@ export const chainEnabled = () => !!config.nimiq.rpcUrl;
 
 export function validateConfig(logger = console) {
   const problems = [];
+  if ((config.env === 'production' || process.env.DB_MODE === 'supabase') && !process.env.AUTH_SECRET) {
+    const message = '[config] AUTH_SECRET must be set permanently in the deployment environment; refusing ephemeral sessions.';
+    logger.error(message);
+    throw new Error(message);
+  }
   if (config.authSecret.startsWith('dev-secret-')) {
     logger.warn('[config] AUTH_SECRET not set — using an ephemeral dev secret (sessions reset on restart).');
   }
