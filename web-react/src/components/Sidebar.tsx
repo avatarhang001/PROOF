@@ -44,14 +44,22 @@ function SidebarBody({ isDark, onToggleTheme }: Common) {
                           isActive ? "h-5 opacity-100" : "h-1 opacity-0 group-hover:h-3 group-hover:opacity-60",
                         )}
                       />
-                      <Icon
-                        className={cn(
-                          "h-[18px] w-[18px] shrink-0 transition-colors duration-200",
-                          isActive ? "text-brand" : "text-faint group-hover:text-ink-soft",
-                        )}
-                      />
+                      <span className="relative shrink-0">
+                        <Icon
+                          className={cn(
+                            "h-[18px] w-[18px] transition-colors duration-200",
+                            isActive ? "text-brand" : "text-faint group-hover:text-ink-soft",
+                          )}
+                        />
+                        {item.id === "notifications" && item.badge && item.badge > 0 ? (
+                          <span
+                            aria-label={`${item.badge} unread notification${item.badge === 1 ? "" : "s"}`}
+                            className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#F5A524] ring-2 ring-surface"
+                          />
+                        ) : null}
+                      </span>
                       <span className="truncate">{item.label}</span>
-                      {item.badge && item.badge > 0 ? (
+                      {item.id !== "notifications" && item.badge && item.badge > 0 ? (
                         <span className="ml-auto grid h-[19px] min-w-[19px] place-items-center rounded-full bg-[#F5A524] px-1 text-[11px] font-bold text-white shadow-[0_4px_10px_-3px_rgba(245,165,36,0.9)]">
                           {item.badge > 9 ? '9+' : item.badge}
                         </span>

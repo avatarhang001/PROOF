@@ -94,9 +94,10 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
           >
             <BellIcon className="h-[21px] w-[21px]" />
             {user?.unreadNotifications && user.unreadNotifications > 0 && (
-              <span className="absolute right-0 top-0 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-[#F5A524] px-1 text-[10px] font-bold leading-none text-white ring-2 ring-surface">
-                {user.unreadNotifications > 9 ? '9+' : user.unreadNotifications}
-              </span>
+              <span
+                aria-hidden="true"
+                className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-[#F5A524] ring-2 ring-surface"
+              />
             )}
           </Link>
 

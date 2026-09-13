@@ -190,16 +190,22 @@ route('POST', '/api/auth/verify', async (ctx) => {
     throw httpError(400, 'BAD_NONCE', 'This sign-in request expired. Try again.');
   }
 
-  // For Hub mode, trust the address from Hub since it handles contract addresses
-  // For nimiqpay, validate that address matches the public key (basic account only)
+  // For Hub mode, trust the address from Hub since it handles contract addresses.
+  // For Nimiq Pay, the signed public key is authoritative. Some provider versions
+  // can return a different selected-account address from listAccounts() than the
+  // account used by sign(), so derive the basic-account address after verification.
+  let authenticatedAddress = body.address;
   if (mode === 'nimiqpay') {
     const derivedAddress = nimiqAddressFromPublicKey(String(body?.publicKey || ''));
     const providedAddress = normalizeNimiqAddress(body.address);
     const normalizedDerived = derivedAddress ? normalizeNimiqAddress(derivedAddress) : null;
 
-    if (!looksLikeNimiqAddress(String(body.address || '').toUpperCase()) || !derivedAddress || normalizedDerived !== providedAddress) {
+    if (!derivedAddress) {
       throw httpError(401, 'ADDRESS_MISMATCH', 'Wallet address does not match the public key.');
     }
+    if (!looksLikeNimiqAddress(String(body.address || '').toUpperCase()) || normalizedDerived !== providedAddress)
+      console.warn('[auth/verify] Nimiq Pay address differed from signed key; using derived address.');
+    authenticatedAddress = derivedAddress;
   } else if (mode === 'hub') {
     // Hub mode: just validate address format, signature verification is sufficient
     if (!looksLikeNimiqAddress(body.address)) {
@@ -236,10 +242,10 @@ route('POST', '/api/auth/verify', async (ctx) => {
     }
   }
   
-  if (isNimiqMode && looksLikeNimiqAddress(body.address)) {
-    user = await users.findByWallet(body.address);
-    if (!user) user = await users.createUser({ walletAddress: body.address, walletMode: mode, username: customUsername });
-    else await users.update(user, { walletAddress: body.address, walletMode: mode, publicKey: body.publicKey });
+  if (isNimiqMode && looksLikeNimiqAddress(authenticatedAddress)) {
+    user = await users.findByWallet(authenticatedAddress);
+    if (!user) user = await users.createUser({ walletAddress: authenticatedAddress, walletMode: mode, username: customUsername });
+    else await users.update(user, { walletAddress: authenticatedAddress, walletMode: mode, publicKey: body.publicKey });
   } else {
     user = await users.findByPublicKey(body.publicKey);
     if (!user) user = await users.createUser({ walletMode: 'demo', username: customUsername });
@@ -1025,20 +1031,26 @@ route('GET', '/api/lesson/:skill/:topic', async (ctx) => {
     } catch (docError) {
       // If both fail, return a basic structure
       const basicLesson = {
+        skillSlug: params.skill,
+        topicSlug: params.topic,
+        estMin: 10,
         topic: params.topic,
         title: params.topic.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-        sections: [
-          {
-            heading: 'Overview',
-            paragraphs: [
-              'This lesson is part of a document-based curriculum. The content will be available as you progress through the course.',
-              'Use the tutor feature if you have questions about this topic.'
-            ]
-          }
-        ],
-        keyPoints: [],
-        practice: [],
-        summary: 'This is a dynamically generated lesson from your uploaded document.'
+        tldr: 'Build a useful foundation for this topic, then apply it in the practice step.',
+        sections: [{
+          h: 'Overview',
+          body: 'This lesson is part of a personalized curriculum. Read the topic overview, then continue to practice when you are ready.'
+        }],
+        keyPoints: ['Explain the main idea in your own words before moving on.'],
+        practice: [{
+          q: `Which action best helps you apply ${params.topic.replace(/-/g, ' ')}?`,
+          choices: ['Explain the idea and use it in a small example', 'Skip the explanation and memorize the title', 'Wait until the final assessment'],
+          answerIdx: 0,
+          why: 'Explaining an idea and applying it in a small example creates a useful proof of understanding.'
+        }],
+        quiz: [],
+        recall: [],
+        summary: 'This lesson is ready for practice.'
       };
       json(res, 200, basicLesson);
     }
