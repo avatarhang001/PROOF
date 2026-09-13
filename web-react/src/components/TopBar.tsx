@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { MenuIcon, SearchIcon, WalletIcon, UserIcon } from "./Icons";
+import { BellIcon, MenuIcon, SearchIcon, WalletIcon, UserIcon } from "./Icons";
+import { notificationsService } from "../services/notifications.service";
 
 export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
-  const { user } = useAuth();
+  const { user, refreshUser, updateUser } = useAuth();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
@@ -20,6 +21,25 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const refreshUnread = async () => {
+      try {
+        const response = await notificationsService.getNotifications();
+        if (!cancelled) updateUser({ unreadNotifications: response.unread });
+      } catch {
+        // Keep the last known state when notifications are temporarily unavailable.
+      }
+    };
+    void refreshUnread();
+    const interval = window.setInterval(() => { void refreshUnread(); }, 60_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [updateUser, user?.id]);
 
   const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -64,6 +84,22 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
         </form>
 
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+          <Link
+            to="/notifications"
+            onClick={() => { void refreshUser(); }}
+            title={user?.unreadNotifications ? `${user.unreadNotifications} unread notification${user.unreadNotifications === 1 ? '' : 's'}` : 'Notifications'}
+            aria-label={`Notifications${user?.unreadNotifications ? `, ${user.unreadNotifications} unread` : ''}`}
+            className="group relative grid h-[42px] w-[42px] place-items-center rounded-xl border border-line text-ink-soft transition-colors hover:border-line-strong hover:bg-elevated hover:text-ink"
+          >
+            <BellIcon className="h-[20px] w-[20px] transition-transform duration-200 group-hover:-rotate-6" />
+            {user?.unreadNotifications ? (
+              <span
+                aria-hidden="true"
+                className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-[#F5A524] ring-2 ring-surface"
+              />
+            ) : null}
+          </Link>
+
           {/* Profile/Wallet Button */}
           {user ? (
             <Link
