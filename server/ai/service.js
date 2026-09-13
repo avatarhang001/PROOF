@@ -61,11 +61,25 @@ export async function generateLearningPath(input) {
 }
 
 /* ────────────────────────── lessons ───────────────────────────────── */
-export async function generateLesson(domain, topicSlug) {
+export async function generateLesson(domain, topicSlug, language = 'en') {
   const lesson = engine.lessonFor(domain, topicSlug);
   if (!lesson) throw new Error('TOPIC_NOT_FOUND');
-  // (LLM enrichment point — engine content ships for determinism)
-  return { ...lesson, engine: 'proof-engine' };
+  if (language === 'en' || !llmEnabled()) return { ...lesson, engine: 'proof-engine' };
+
+  try {
+    const translated = await llmJson({
+      system: `You translate structured learning lessons for PROOF. Translate every learner-facing string into ${language}. Preserve meaning, educational accuracy, array order, quiz answerIdx values, code, FEN, language tags, and all JSON structure. Return only the translated lesson JSON.`,
+      prompt: JSON.stringify(lesson),
+      maxTokens: 5000,
+    });
+    if (!translated || typeof translated !== 'object' || typeof translated.title !== 'string' || !Array.isArray(translated.sections)) {
+      throw new Error('INVALID_TRANSLATED_LESSON');
+    }
+    return { ...lesson, ...translated, engine: `proof-engine+${language}` };
+  } catch (error) {
+    log(`lesson translation fallback (${language}):`, error.message);
+    return { ...lesson, engine: 'proof-engine' };
+  }
 }
 
 export function generateExercise(domain, topicSlug) {

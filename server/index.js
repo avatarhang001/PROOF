@@ -1004,9 +1004,11 @@ const lessonCache = new Map();
 route('GET', '/api/lesson/:skill/:topic', async (ctx) => {
   const { params, res } = ctx;
   const startTime = Date.now();
+  const requestedLanguage = new URL(ctx.req.url, 'http://localhost').searchParams.get('lang');
+  const language = ['en', 'es', 'fr', 'de', 'pt', 'zh'].includes(requestedLanguage || '') ? requestedLanguage : 'en';
   
   // Check cache first
-  const cacheKey = `${params.skill}:${params.topic}`;
+  const cacheKey = `${language}:${params.skill}:${params.topic}`;
   if (lessonCache.has(cacheKey)) {
     console.log(`[LESSON CACHE HIT] ${cacheKey} (${Date.now() - startTime}ms)`);
     return json(res, 200, lessonCache.get(cacheKey));
@@ -1016,7 +1018,7 @@ route('GET', '/api/lesson/:skill/:topic', async (ctx) => {
   
   try {
     const genStart = Date.now();
-    const lesson = await generateLesson(params.skill, params.topic);
+    const lesson = await generateLesson(params.skill, params.topic, language);
     console.log(`[LESSON GENERATED] ${cacheKey} (${Date.now() - genStart}ms)`);
     
     lessonCache.set(cacheKey, lesson); // Cache the result
