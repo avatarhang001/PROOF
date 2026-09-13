@@ -54,10 +54,10 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
   const [boardVersion, setBoardVersion] = useState(0);
   const [currentFen, setCurrentFen] = useState('');
   const [analysis, setAnalysis] = useState<PositionAnalysisResponse | null>(null);
+  const [aiThinking, setAiThinking] = useState(false);
   const [analysing, setAnalysing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const analysisRequest = useRef(0);
-  const autoMoveKey = useRef<string | null>(null);
   const active = positions[activeIndex] || positions[0];
   const activeRecord = records.find((record) => record.positionKey === activeIndex);
   const boardStatus = useMemo(() => {
@@ -76,7 +76,7 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
     onChange({ positions: records.filter((record) => record.moves.length) });
   }, [records, onChange]);
 
-  const analyse = async (fen: string, letAiMove = false) => {
+  const analyse = async (fen: string): Promise<PositionAnalysisResponse | null> => {
     const requestId = ++analysisRequest.current;
     try {
       setAnalysing(true);
@@ -84,25 +84,14 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
       const nextAnalysis = await analysisApi.analyzePosition({ fen, depth: 15 });
       if (requestId === analysisRequest.current) {
         setAnalysis(nextAnalysis);
-        if (letAiMove && autoMoveKey.current !== `${activeIndex}-${boardVersion}`) {
-          const engineMove = playEngineMove(fen, nextAnalysis.evaluation.bestMove);
-          autoMoveKey.current = `${activeIndex}-${boardVersion}`;
-          if (engineMove) {
-            setCurrentFen(engineMove.fen);
-            setRecords((current) => {
-              const prior = current.find((record) => record.positionKey === activeIndex);
-              const next = { positionKey: activeIndex, initialFen: active.fen, moves: [...(prior?.moves || []), engineMove.san] };
-              return [...current.filter((record) => record.positionKey !== activeIndex), next];
-            });
-            setAnalysis(null);
-            void analyse(engineMove.fen);
-          }
-        }
+        return nextAnalysis;
       }
+      return null;
     } catch (error) {
       if (requestId === analysisRequest.current) {
         setAnalysisError(error instanceof Error ? error.message : 'AI analysis is unavailable right now.');
       }
+      return null;
     } finally {
       if (requestId === analysisRequest.current) {
         setAnalysing(false);
@@ -111,11 +100,11 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
   };
 
   useEffect(() => {
+    analysisRequest.current += 1;
     setAnalysis(null);
     setAnalysisError(null);
     setCurrentFen(active.fen);
-    autoMoveKey.current = null;
-    void analyse(active.fen, true);
+    setAiThinking(false);
   }, [active.fen, activeIndex, boardVersion]);
 
   const resetLine = () => {
@@ -134,8 +123,8 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand">Interactive FEN board</p>
-            <h2 className="mt-1 text-lg font-bold text-ink">Watch the AI play the position.</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">The board is controlled by the AI. It chooses a legal move, plays it, and then explains the resulting position.</p>
+            <h2 className="mt-1 text-lg font-bold text-ink">Solve the position with the AI coach.</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">Make a legal move, watch the AI reply, then review the analysis of the resulting position.</p>
           </div>
           <span className="rounded-full border border-brand/20 bg-brand-soft px-3 py-1 text-xs font-semibold text-brand">
             {records.length}/{positions.length} line{positions.length === 1 ? '' : 's'} recorded
@@ -164,10 +153,11 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
       <div className="grid gap-5 p-5 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
         <div className="min-w-0">
           <ChessBoard
-            key={`${currentFen || active.fen}-${boardVersion}`}
+            key={`${active.fen}-${boardVersion}`}
             initialFen={currentFen || active.fen}
-            disabled
+            disabled={disabled || aiThinking}
             onMove={(move, finalFen) => {
+              setAiThinking(true);
               setRecords((current) => {
                 const prior = current.find((record) => record.positionKey === activeIndex);
                 const next = { positionKey: activeIndex, initialFen: active.fen, moves: [...(prior?.moves || []), move.san] };
@@ -175,7 +165,30 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
               });
               setCurrentFen(finalFen);
               setAnalysis(null);
-              void analyse(finalFen);
+              void (async () => {
+                const playerAnalysis = await analyse(finalFen);
+                if (!playerAnalysis) {
+                  setAiThinking(false);
+                  return;
+                }
+
+                const engineMove = playEngineMove(finalFen, playerAnalysis.evaluation.bestMove);
+                if (!engineMove) {
+                  setAiThinking(false);
+                  return;
+                }
+
+                setAnalysis(null);
+                setCurrentFen(engineMove.fen);
+                setRecords((current) => {
+                  const prior = current.find((record) => record.positionKey === activeIndex);
+                  const next = { positionKey: activeIndex, initialFen: active.fen, moves: [...(prior?.moves || []), engineMove.san] };
+                  return [...current.filter((record) => record.positionKey !== activeIndex), next];
+                });
+
+                await analyse(engineMove.fen);
+                setAiThinking(false);
+              })();
             }}
           />
         </div>
@@ -196,7 +209,7 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
               <p className="text-xs font-bold uppercase tracking-wide text-muted">Recorded line</p>
               <button type="button" onClick={resetLine} disabled={disabled || !activeRecord} className="text-xs font-semibold text-brand hover:text-brand-deep disabled:cursor-not-allowed disabled:opacity-40">Reset line</button>
             </div>
-              <p className="mt-2 min-h-5 break-words font-mono text-sm text-ink">{activeRecord?.moves.length ? activeRecord.moves.join('  ') : 'The AI is preparing its legal move…'}</p>
+              <p className="mt-2 min-h-5 break-words font-mono text-sm text-ink">{activeRecord?.moves.length ? activeRecord.moves.join('  ') : 'Your move starts the puzzle line.'}</p>
           </div>
 
           <div className="rounded-xl border border-brand/20 bg-brand-soft/50 p-4">
@@ -205,14 +218,14 @@ export function ChessProofBoard({ challenge, disabled = false, onChange }: {
                 <p className="text-sm font-bold text-ink">AI position check</p>
                 <p className="mt-0.5 text-xs text-muted">Analyses the current FEN, not a written answer.</p>
               </div>
-              <button type="button" onClick={() => void analyse(currentFen || active.fen)} disabled={disabled || analysing} className="rounded-lg bg-ink px-3 py-2 text-xs font-bold text-surface transition-colors hover:bg-brand disabled:opacity-50">
+              <button type="button" onClick={() => void analyse(currentFen || active.fen)} disabled={disabled || aiThinking || analysing} className="rounded-lg bg-ink px-3 py-2 text-xs font-bold text-surface transition-colors hover:bg-brand disabled:opacity-50">
                 {analysing ? 'Analysing…' : 'Analyse position'}
               </button>
             </div>
             {analysing && (
               <div className="mt-3 flex items-center gap-2 rounded-lg border border-brand/15 bg-surface px-3 py-2 text-sm text-brand" role="status">
                 <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-brand border-t-transparent" />
-                <span>AI is reviewing {currentFen ? 'your latest move' : 'the position'}…</span>
+                <span>{aiThinking ? 'AI is replying to your move…' : 'AI is reviewing the position…'}</span>
               </div>
             )}
             {analysis && !analysing && <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
