@@ -49,12 +49,13 @@ function SidebarBody({ isDark, onToggleTheme }: Common) {
                           className={cn(
                             "h-[18px] w-[18px] transition-colors duration-200",
                             isActive ? "text-brand" : "text-faint group-hover:text-ink-soft",
+                            item.id === "notifications" && item.badge ? "animate-[bell-ring_1.8s_ease-in-out_infinite]" : "",
                           )}
                         />
                         {item.id === "notifications" && item.badge && item.badge > 0 ? (
                           <span
                             aria-label={`${item.badge} unread notification${item.badge === 1 ? "" : "s"}`}
-                            className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#F5A524] ring-2 ring-surface"
+                            className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#F5A524] ring-2 ring-surface animate-pulse"
                           />
                         ) : null}
                       </span>

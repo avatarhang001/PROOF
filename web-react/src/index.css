@@ -272,6 +272,21 @@
   }
 }
 
+@keyframes bell-ring {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  8%, 24%, 40% {
+    transform: rotate(8deg);
+  }
+  16%, 32% {
+    transform: rotate(-8deg);
+  }
+  48% {
+    transform: rotate(0deg);
+  }
+}
+
 @keyframes wave {
   0%, 60%, 100% {
     transform: rotate(0deg);
@@ -297,7 +312,8 @@
   .anim-float,
   .anim-float-slow,
   .anim-glow,
-  .anim-pulse-gentle {
+  .anim-pulse-gentle,
+  [class*="bell-ring"] {
     animation: none !important;
   }
 }

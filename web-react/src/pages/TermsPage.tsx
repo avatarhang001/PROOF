@@ -162,8 +162,8 @@ export function TermsPage() {
             <h2 className="mb-3 text-2xl font-bold text-ink">Contact Information</h2>
             <p className="text-base leading-relaxed text-muted">
               For questions about these Terms of Service, contact us at:{' '}
-              <a href="mailto:legal@prooflabs.xyz" className="font-semibold text-brand hover:underline">
-                legal@prooflabs.xyz
+              <a href="mailto:legendarytunz@gmail.com" className="font-semibold text-brand hover:underline">
+                legendarytunz@gmail.com
               </a>
             </p>
           </section>

@@ -274,7 +274,7 @@ export function SettingsPage() {
                 {t.settings.terms}
               </Link>
               <span>·</span>
-              <a href="mailto:privacy@prooflabs.xyz" className="font-medium text-brand hover:underline">
+              <a href="mailto:legendarytunz@gmail.com" className="font-medium text-brand hover:underline">
                 {t.settings.dataExport}
               </a>
             </div>

@@ -90,13 +90,13 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
             onClick={() => { void refreshUser(); }}
             title={user?.unreadNotifications ? `${user.unreadNotifications} unread notification${user.unreadNotifications === 1 ? '' : 's'}` : 'Notifications'}
             aria-label={`Notifications${user?.unreadNotifications ? `, ${user.unreadNotifications} unread` : ''}`}
-            className="group relative grid h-[42px] w-[42px] place-items-center rounded-xl text-ink-soft transition-colors hover:bg-elevated hover:text-ink"
+            className={`group relative grid h-[42px] w-[42px] place-items-center rounded-xl text-ink-soft transition-colors hover:bg-elevated hover:text-ink ${user?.unreadNotifications ? 'bg-brand-soft/60' : ''}`}
           >
-            <BellIcon className="h-[21px] w-[21px]" />
+            <BellIcon className={`h-[21px] w-[21px] ${user?.unreadNotifications ? 'animate-[bell-ring_1.8s_ease-in-out_infinite]' : ''}`} />
             {user?.unreadNotifications && user.unreadNotifications > 0 && (
               <span
                 aria-hidden="true"
-                className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-[#F5A524] ring-2 ring-surface"
+                className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-[#F5A524] ring-2 ring-surface animate-pulse"
               />
             )}
           </Link>
